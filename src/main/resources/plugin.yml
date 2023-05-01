@@ -1,0 +1,9 @@
+name: Blockbattles
+version: '${project.version}'
+main: dev.cregg.blockbattles.Blockbattles
+api-version: 1.19
+commands:
+  duel:
+    description: Request a duel
+    usage: /duel <username>
+    permission:
