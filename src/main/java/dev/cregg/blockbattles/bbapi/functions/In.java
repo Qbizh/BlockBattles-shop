@@ -8,7 +8,7 @@ import org.luaj.vm2.lib.ThreeArgFunction;
 public class In extends ThreeArgFunction {
     @Override
     public LuaValue call(LuaValue time, LuaValue callback, LuaValue passargs) {
-        System.out.println(Bukkit.getPluginManager().getPlugin("Blockbattles") != null);
+
 
         Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
 

@@ -12,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DuelCommand implements CommandExecutor {
     public static List<String[]> playersInGame = new ArrayList<String[]>();
@@ -78,6 +75,24 @@ public class DuelCommand implements CommandExecutor {
             }
         }
         return false;
+    }
+
+    public static Player getOpps(String uuid) {
+        Player opp = null;
+        for (String[] game : playersInGame) {
+            for (String player : game) {
+                int idx = 0;
+                int pidx = player.indexOf(player);
+                if(pidx == -1) {
+                    continue;
+                } else if (pidx == 0) {
+                    idx = 1;
+                }
+               opp = Bukkit.getPlayer(UUID.fromString(game[idx]));
+            }
+        }
+
+        return opp;
     }
 
 

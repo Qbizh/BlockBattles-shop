@@ -15,7 +15,7 @@ public class GetBlock extends TwoArgFunction {
     public LuaValue call(LuaValue player,LuaValue xyz) {
         World world = Bukkit.getPlayer(player.get("name").toString()).getWorld();
 
-        return LuaValue.valueOf(world.getBlockAt(xyz.get(0).toint(), xyz.get(1).toint(), xyz.get(1).toint()).getBlockData().getMaterial().toString());
+        return LuaValue.valueOf(world.getBlockAt(xyz.get(0).toint(), xyz.get(1).toint(), xyz.get(2).toint()).getBlockData().getMaterial().toString());
     }
 }
 
