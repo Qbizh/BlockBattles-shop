@@ -11,10 +11,13 @@ public final class Blockbattles extends JavaPlugin {
     Logger logger = Bukkit.getServer().getLogger();
     @Override
     public void onEnable() {
+
         // Plugin startup logic
         logger.log(Level.INFO, "Block battles loaded");
+        logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
         this.getCommand("duel").setExecutor(new DuelCommand());
-        getServer().getPluginManager().registerEvents(new BlockListener(), this);
+        this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
+        getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
 
     }
 

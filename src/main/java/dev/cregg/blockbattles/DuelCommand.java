@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DuelCommand implements CommandExecutor {
-
+    public static List<String[]> playersInGame = new ArrayList<String[]>();
     private HashMap<String, String> outgoingChallengeList;
 
     public DuelCommand() {
@@ -49,22 +49,35 @@ public class DuelCommand implements CommandExecutor {
                         wc.generateStructures(false);
                         wc.createWorld();
                         world = Bukkit.getWorld(other.getUniqueId().toString());
-                        Structure structure = new S
+
                     } else {
                         world = altWorld;
                     }
                 }
                 player.teleport(new Location(world, 0, 0, 0));
+                playersInGame.add(new String[] {player.getUniqueId().toString(), other.getUniqueId().toString()});
 
 
 
             } else {
-                other.sendMessage(ChatColor.GREEN + player.getDisplayName() + " challenged you to a duel");
+                other.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + player.getDisplayName() + " challenged you to a duel");
                 outgoingChallengeList.put(other.getDisplayName(), player.getDisplayName());
             }
         }
 
         return true;
+    }
+
+    public static boolean isInGame(String uuid) {
+
+        for (String[] game : playersInGame) {
+            for (String player : game) {
+                if(player.equals(uuid)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
