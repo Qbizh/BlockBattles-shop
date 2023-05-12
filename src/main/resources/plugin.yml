@@ -2,6 +2,9 @@ name: Blockbattles
 version: '${project.version}'
 main: dev.cregg.blockbattles.Blockbattles
 api-version: 1.19
+libraries:
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-api:2.10.0
+  - com.github.shynixn.structureblocklib:structureblocklib-bukkit-core:2.10.0
 commands:
   duel:
     description: Request a duel
@@ -10,4 +13,8 @@ commands:
   reloadlua:
     description: Reload lua
     usage: /reloadlua
+    permission:
+  blockdeck:
+    description: Configure your block battles deck
+    usage: /blockdeck
     permission:

@@ -82,6 +82,7 @@
             <artifactId>luaj-jse</artifactId>
             <version>3.0.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>

@@ -1,6 +1,10 @@
 package dev.cregg.blockbattles.bbapi;
 
 import dev.cregg.blockbattles.DuelCommand;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Painting;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.luaj.vm2.LuaTable;
 
@@ -22,8 +26,10 @@ public class PlaceEventBuilder {
         y = event.getBlock().getState().getY();
         z = event.getBlock().getState().getZ();
 
+
+
         this.placer = new PlayerBuilder(event.getPlayer()).build();
-        this.opps = new PlayerBuilder(DuelCommand.getOpps(this.placer.get("uuid").toString())).build();
+        this.opps = new PlayerBuilder(DuelCommand.getOpps(event.getPlayer().getUniqueId().toString())).build();
     }
 
     public LuaTable build() {
