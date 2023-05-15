@@ -30,32 +30,32 @@ public class SetScene extends TwoArgFunction {
 
 
 
-    @Override
-    public LuaValue call(LuaValue worldName, LuaValue scenename) {
-        World world = Bukkit.getWorld(worldName.toString());
+	@Override
+	public LuaValue call(LuaValue worldName, LuaValue scenename) {
+		World world = Bukkit.getWorld(worldName.toString());
 
 
-        placeStructure(world, scenename.toString(), 0, 0, 0);
-        return LuaValue.NIL;
-    }
+		placeStructure(world, scenename.toString(), 0, 0, 0);
+		return LuaValue.NIL;
+	}
 
-    public static void placeStructure(World world, String structurename, int x, int y, int z) {
+	public static void placeStructure(World world, String structurename, int x, int y, int z) {
 
-        StructureManager manager = Bukkit.getStructureManager();
-        File file = Paths.get(Blockbattles.datapath, "scenes",structurename + ".nbt").toFile();
-        Structure structure;
-        try {
-            structure = manager.loadStructure(file);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+		StructureManager manager = Bukkit.getStructureManager();
+		File file = Paths.get(Blockbattles.datapath, "scenes",structurename + ".nbt").toFile();
+		Structure structure;
+		try {
+			structure = manager.loadStructure(file);
 
 
-        structure.place(new Location(world, x, y, z), false, StructureRotation.NONE, Mirror.NONE, 0, 1, new Random());
-        System.out.println("got here");
-    }
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+
+		structure.place(new Location(world, x, y, z), false, StructureRotation.NONE, Mirror.NONE, 0, 1, new Random());
+		System.out.println("got here");
+	}
 }
 

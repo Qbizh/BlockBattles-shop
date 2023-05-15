@@ -9,21 +9,21 @@ public class EntityBuilder {
 
 
 
-    private String type;
-    private String world;
+	private String type;
+	private String world;
 
 
-    public EntityBuilder(Entity entity) {
-        this.type = entity.getType().name().toString();
-        this.world = entity.getWorld().getName();
+	public EntityBuilder(Entity entity) {
+		this.type = entity.getType().name().toString();
+		this.world = entity.getWorld().getName();
 
-    }
+	}
 
-    public LuaTable build() {
-        LuaTable table = new LuaTable();
+	public LuaTable build() {
+		LuaTable table = new LuaTable();
 
-        table.set("type", this.type);
-        table.set("world", this.world);
-        return table;
-    }
+		table.set("type", this.type);
+		table.set("world", this.world);
+		return table;
+	}
 }

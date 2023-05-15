@@ -14,16 +14,16 @@ public class BlockBattlesShopCommand implements CommandExecutor {
 
 
 
-    // This method is called, when somebody uses our command
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = (Player) sender;
-        System.out.println("why does nothing ever work");
-        if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
-            Blockbattles.shopGUI.openInventory(player);
-        }
-        return true;
-    }
+	// This method is called, when somebody uses our command
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		Player player = (Player) sender;
+		System.out.println("why does nothing ever work");
+		if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
+			Blockbattles.shopGUI.openInventory(player);
+		}
+		return true;
+	}
 
 
 

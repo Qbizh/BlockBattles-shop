@@ -15,15 +15,15 @@ public class ReloadLuaCommand implements CommandExecutor {
 
 
 
-    // This method is called, when somebody uses our command
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        BlockListener.reloadLua();
-        sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Reloaded lua at " + Blockbattles.datapath + "\\script.lua");
-        Player player = (Player) sender;
-        player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, SoundCategory.MASTER, 5f, 1f);
-        return true;
-    }
+	// This method is called, when somebody uses our command
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		BlockListener.reloadLua();
+		sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "Reloaded lua at " + Blockbattles.datapath + "\\script.lua");
+		Player player = (Player) sender;
+		player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, SoundCategory.MASTER, 5f, 1f);
+		return true;
+	}
 
 
 

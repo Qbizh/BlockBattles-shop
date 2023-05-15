@@ -27,68 +27,68 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class ShopGUI implements Listener {
-    private Inventory inv;
+	private Inventory inv;
 
-    public ShopGUI() {
-        // Create a new inventory, with no owner (as this isn't a real inventory), a size of nine, called example
-        inv = Bukkit.createInventory(null, 9 * 3, "Block Deck");
+	public ShopGUI() {
+		// Create a new inventory, with no owner (as this isn't a real inventory), a size of nine, called example
+		inv = Bukkit.createInventory(null, 9 * 3, "Block Deck");
 
-        // Put the items into the inventory
-        initializeItems();
-    }
+		// Put the items into the inventory
+		initializeItems();
+	}
 
-    // You can call this whenever you want to put the items in
-    public void initializeItems() {
-        if(Blockbattles.config == null) {
-            return;
-        }
-        List<String> shopitems = Blockbattles.config.getStringList("shopitems");
-        if(shopitems == null) {
-            Blockbattles.defaultConfig();
-            return;
-        }
+	// You can call this whenever you want to put the items in
+	public void initializeItems() {
+		if(Blockbattles.config == null) {
+			return;
+		}
+		List<String> shopitems = Blockbattles.config.getStringList("shopitems");
+		if(shopitems == null) {
+			Blockbattles.defaultConfig();
+			return;
+		}
 
-    }
+	}
 
-    // Nice little method to create a gui item with a custom name, and description
-    public static ItemStack createGuiItem(final Material material, final String... lore) {
-        final ItemStack item = new ItemStack(material, 1);
-        final ItemMeta meta = item.getItemMeta();
+	// Nice little method to create a gui item with a custom name, and description
+	public static ItemStack createGuiItem(final Material material, final String... lore) {
+		final ItemStack item = new ItemStack(material, 1);
+		final ItemMeta meta = item.getItemMeta();
 
-        // Set the name of the item
+		// Set the name of the item
 
 
-        // Set the lore of the item
-        meta.setLore(Arrays.asList(lore));
+		// Set the lore of the item
+		meta.setLore(Arrays.asList(lore));
 
-        item.setItemMeta(meta);
+		item.setItemMeta(meta);
 
-        return item;
-    }
+		return item;
+	}
 
-    // You can open the inventory with this
-    public void openInventory(final HumanEntity ent) {
-        inv = Bukkit.createInventory(null, 9 * 1, "Block Deck");
-        ItemStack[] items = Blockbattles.decks.get(ent.getUniqueId().toString());
-        if(items != null) {
-            inv.setContents(items);
-        }
+	// You can open the inventory with this
+	public void openInventory(final HumanEntity ent) {
+		inv = Bukkit.createInventory(null, 9 * 1, "Block Deck");
+		ItemStack[] items = Blockbattles.decks.get(ent.getUniqueId().toString());
+		if(items != null) {
+			inv.setContents(items);
+		}
 
-        ent.openInventory(inv);
-    }
+		ent.openInventory(inv);
+	}
 
-    // Check for clicks on items
-    @EventHandler
-    public void onInventoryClick(final InventoryClickEvent e) {
-        if (e.getView().getTitle().equals("Block Deck")) {
-            ItemStack itemStack = e.getCurrentItem();
-            if(itemStack == null) {
-                return;
-            }
-            if(itemStack.getItemMeta().getLore() == null|| !itemStack.getItemMeta().getLore().get(0).equals("To be used in block battles...")) {
-                e.setCancelled(true);
-            }
-        }
+	// Check for clicks on items
+	@EventHandler
+	public void onInventoryClick(final InventoryClickEvent e) {
+		if (e.getView().getTitle().equals("Block Deck")) {
+			ItemStack itemStack = e.getCurrentItem();
+			if(itemStack == null) {
+				return;
+			}
+			if(itemStack.getItemMeta().getLore() == null|| !itemStack.getItemMeta().getLore().get(0).equals("To be used in block battles...")) {
+				e.setCancelled(true);
+			}
+		}
 //        if (!e.getInventory().equals(inv)) return;
 //
 //        e.setCancelled(true);
@@ -102,9 +102,9 @@ public class ShopGUI implements Listener {
 //
 //        // Using slots click is a best option for your inventory click's
 //        p.sendMessage("You clicked at slot " + e.getRawSlot());
-    }
+	}
 
-    // Cancel dragging in our inventory
+	// Cancel dragging in our inventory
 //    @EventHandler
 //    public void onInventoryClick(final InventoryDragEvent e) {
 //        if (e.getView().getTitle().equals("Block Shop")) {
@@ -114,30 +114,30 @@ public class ShopGUI implements Listener {
 //        }
 //    }
 
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        if (e.getView().getTitle().equals("Block Deck")) {
-            Blockbattles.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
-            File dataFile = new File(Blockbattles.datapath, "decks.yml");
-            FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-            data.set(e.getPlayer().getUniqueId().toString(), serializeInventory(e.getInventory().getContents()));
-            try {
-                data.save(dataFile);
-                System.out.println("saved it at: " + dataFile.getAbsolutePath());
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
+	@EventHandler
+	public void onInventoryClose(InventoryCloseEvent e) {
+		if (e.getView().getTitle().equals("Block Deck")) {
+			Blockbattles.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
+			File dataFile = new File(Blockbattles.datapath, "decks.yml");
+			FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
+			data.set(e.getPlayer().getUniqueId().toString(), serializeInventory(e.getInventory().getContents()));
+			try {
+				data.save(dataFile);
+				System.out.println("saved it at: " + dataFile.getAbsolutePath());
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
+		}
+	}
 
-    public static List<Map<String, Object>> serializeInventory(ItemStack[] contents) {
-        List<Map<String, Object>> output = new ArrayList<>();
-        for (ItemStack item:contents
-             ) {
-            if(item != null) {
-                output.add(item.serialize());
-            }
-        }
-        return output;
-    }
+	public static List<Map<String, Object>> serializeInventory(ItemStack[] contents) {
+		List<Map<String, Object>> output = new ArrayList<>();
+		for (ItemStack item:contents
+		) {
+			if(item != null) {
+				output.add(item.serialize());
+			}
+		}
+		return output;
+	}
 }

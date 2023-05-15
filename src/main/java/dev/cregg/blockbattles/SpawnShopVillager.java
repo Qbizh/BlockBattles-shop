@@ -21,29 +21,29 @@ public class SpawnShopVillager implements CommandExecutor {
 
 
 
-    // This method is called, when somebody uses our command
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(sender instanceof Player) {
-            Player player = (Player) sender;
+	// This method is called, when somebody uses our command
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if(sender instanceof Player) {
+			Player player = (Player) sender;
 
-            Villager villager = (Villager)player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
-            villager.setProfession(Villager.Profession.NITWIT);
-            villager.setVillagerLevel(5);
-            villager.setAI(false);
-            villager.setInvulnerable(true);
-            List<MerchantRecipe> trades = new ArrayList<>();
+			Villager villager = (Villager)player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
+			villager.setProfession(Villager.Profession.NITWIT);
+			villager.setVillagerLevel(5);
+			villager.setAI(false);
+			villager.setInvulnerable(true);
+			List<MerchantRecipe> trades = new ArrayList<>();
 
-            for (Material key:Blockbattles.trades.keySet()
-                 ) {
+			for (Material key:Blockbattles.trades.keySet()
+			) {
 
-            }
-            villager.setRecipes(trades);
+			}
+			villager.setRecipes(trades);
 
-        }
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 
 }

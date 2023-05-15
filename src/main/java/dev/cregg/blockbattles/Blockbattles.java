@@ -21,145 +21,145 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class Blockbattles extends JavaPlugin {
-    Logger logger = Bukkit.getServer().getLogger();
+	Logger logger = Bukkit.getServer().getLogger();
 
-    public static Plugin plugin;
-    public static Objective playerWins;
-    public static Configuration config;
+	public static Plugin plugin;
+	public static Objective playerWins;
+	public static Configuration config;
 
-    public static ShopGUI shopGUI;
+	public static ShopGUI shopGUI;
 
-    public static HashMap<String, ItemStack[]> decks;
-    public static String datapath;
+	public static HashMap<String, ItemStack[]> decks;
+	public static String datapath;
 
-    public static Map<Material, Material> trades;
+	public static Map<Material, Material> trades;
 
-    public static HashMap<String, PlayerData> gameData;
+	public static HashMap<String, PlayerData> gameData;
 
-    public Blockbattles() {
-        super();
-        datapath = this.getDataFolder().getAbsolutePath();
-        decks = loadDecksFromFile();
-        plugin = this;
-        shopGUI = new ShopGUI();
-        config = this.getConfig();
-        gameData = loadGameData();
+	public Blockbattles() {
+		super();
+		datapath = this.getDataFolder().getAbsolutePath();
+		decks = loadDecksFromFile();
+		plugin = this;
+		shopGUI = new ShopGUI();
+		config = this.getConfig();
+		gameData = loadGameData();
 
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard board = manager.getNewScoreboard();
-        Objective objective = board.registerNewObjective("test", "dummy");
-        playerWins = objective;
-    }
+		ScoreboardManager manager = Bukkit.getScoreboardManager();
+		Scoreboard board = manager.getNewScoreboard();
+		Objective objective = board.registerNewObjective("blockbattles", "dummy");
+		playerWins = objective;
+	}
 
-    public static void defaultConfig() {
-        config = config.getDefaults();
-    }
+	public static void defaultConfig() {
+		config = config.getDefaults();
+	}
 
-    private static HashMap<String, PlayerData> loadGameData() {
-        File dataFile = new File(Blockbattles.datapath, "games.yml");
+	private static HashMap<String, PlayerData> loadGameData() {
+		File dataFile = new File(Blockbattles.datapath, "games.yml");
 
-        FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
+		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
 
-        HashMap<String, PlayerData> output = new HashMap();
-        Set<String> keys = data.getKeys(false);
-        for (String key:keys
-        ) {
-            System.out.println("Game data: " + data.get(key));
-            //output.put(key, data.get(key)).;
-        }
+		HashMap<String, PlayerData> output = new HashMap();
+		Set<String> keys = data.getKeys(false);
+		for (String key:keys
+		) {
+			System.out.println("Game data: " + data.get(key));
+			//output.put(key, data.get(key)).;
+		}
 
-        return output;
-    }
+		return output;
+	}
 
-    private static HashMap<String, ItemStack[]> loadDecksFromFile() {
-        HashMap<String, ItemStack[]> output = new HashMap<>();
+	private static HashMap<String, ItemStack[]> loadDecksFromFile() {
+		HashMap<String, ItemStack[]> output = new HashMap<>();
 
-        File dataFile = new File(Blockbattles.datapath, "decks.yml");
+		File dataFile = new File(Blockbattles.datapath, "decks.yml");
 
-        FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-
-
-        Set<String> keys = data.getKeys(false);
-        for (String key:keys
-             ) {
-            List<ItemStack> itemsList = new ArrayList<>();
-            for (Map<?, ?> item : data.getMapList(key)) { //Iterate across the List of Maps in the config
-                itemsList.add(ItemStack.deserialize((Map<String, Object>) item)); //Add the deserialized ItemStack to your List
-            }
-            ItemStack[] array = new ItemStack[itemsList.size()];
-            output.put(key, itemsList.toArray(array));
-        }
-
-        return output;
-    }
-
-    private static ItemStack[] listToItemArray(List<String> list) {
-        List<ItemStack> items = new ArrayList<>();
-        for (String item:list
-             ) {
+		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
 
 
+		Set<String> keys = data.getKeys(false);
+		for (String key:keys
+		) {
+			List<ItemStack> itemsList = new ArrayList<>();
+			for (Map<?, ?> item : data.getMapList(key)) { //Iterate across the List of Maps in the config
+				itemsList.add(ItemStack.deserialize((Map<String, Object>) item)); //Add the deserialized ItemStack to your List
+			}
+			ItemStack[] array = new ItemStack[itemsList.size()];
+			output.put(key, itemsList.toArray(array));
+		}
 
-            items.add(ShopGUI.createGuiItem(Material.valueOf(item), "To be used in block battles..."));
+		return output;
+	}
+
+	private static ItemStack[] listToItemArray(List<String> list) {
+		List<ItemStack> items = new ArrayList<>();
+		for (String item:list
+		) {
 
 
 
-
-        }
-        ItemStack[] array = new ItemStack[items.size()];
-
-        return items.toArray(array);
-    }
+			items.add(ShopGUI.createGuiItem(Material.valueOf(item), "To be used in block battles..."));
 
 
 
-    @Override
-    public void onEnable() {
 
-        // Plugin startup logic
-        logger.log(Level.INFO, "Block battles loaded");
-        logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
-        this.getCommand("duel").setExecutor(new DuelCommand());
-        this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
-        this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
-        getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
-        getServer().getPluginManager().registerEvents(shopGUI, this);
+		}
+		ItemStack[] array = new ItemStack[items.size()];
 
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
+		return items.toArray(array);
+	}
 
 
 
-        File dataFile = new File(Blockbattles.datapath, "games.yml");
-        FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-        for (String key: gameData.keySet()
-             ) {
-            data.set(key, gameData.get(key));
-        }
+	@Override
+	public void onEnable() {
 
-        try {
-            data.save(dataFile);
-            System.out.println("saved it at: " + dataFile.getAbsolutePath());
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
+		// Plugin startup logic
+		logger.log(Level.INFO, "Block battles loaded");
+		logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
+		this.getCommand("duel").setExecutor(new DuelCommand());
+		this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
+		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
+		getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
+		getServer().getPluginManager().registerEvents(shopGUI, this);
+
+	}
+
+	@Override
+	public void onDisable() {
+		// Plugin shutdown logic
 
 
+
+		File dataFile = new File(Blockbattles.datapath, "games.yml");
+		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
+		for (String key: gameData.keySet()
+		) {
+			data.set(key, gameData.get(key));
+		}
+
+		try {
+			data.save(dataFile);
+			System.out.println("saved it at: " + dataFile.getAbsolutePath());
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
 
 
 
 
 
-        logger.log(Level.INFO, "Block battles unloaded");
-    }
 
-    public static void killAll(World world) {
-        for (Entity entity : world.getEntities()
-             ) {
-            entity.remove();
-        }
-    }
+
+		logger.log(Level.INFO, "Block battles unloaded");
+	}
+
+	public static void killAll(World world) {
+		for (Entity entity : world.getEntities()
+		) {
+			entity.remove();
+		}
+	}
 }

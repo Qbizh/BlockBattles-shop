@@ -33,39 +33,39 @@ public class SetSlot extends ThreeArgFunction {
 
 
 
-    @Override
-    public LuaValue call(LuaValue playerObject, LuaValue inventoryAndSlot, LuaValue itemObject) {
-        Player player = Bukkit.getPlayer(playerObject.get("name").toString());
-        ItemStack itemstack = deserializeItem(itemObject);
-        int slot = inventoryAndSlot.get(2).toint();
-        String inventoryType = inventoryAndSlot.get(1).toString();
-        switch(inventoryType.toString()) {
-            case "inventory":
-                player.getInventory().setItem(slot, itemstack);
-                break;
-            case "echest":
+	@Override
+	public LuaValue call(LuaValue playerObject, LuaValue inventoryAndSlot, LuaValue itemObject) {
+		Player player = Bukkit.getPlayer(playerObject.get("name").toString());
+		ItemStack itemstack = deserializeItem(itemObject);
+		int slot = inventoryAndSlot.get(2).toint();
+		String inventoryType = inventoryAndSlot.get(1).toString();
+		switch(inventoryType.toString()) {
+			case "inventory":
+				player.getInventory().setItem(slot, itemstack);
+				break;
+			case "echest":
 
-                player.getEnderChest().setItem(slot, itemstack);
-                break;
-            default:
-                throw new LuaError("'" + inventoryType + "'" + " is not a valid inventory type");
-        }
-
-
-        return LuaValue.NIL;
-    }
-
-    private ItemStack deserializeItem(LuaValue itemObject) {
-        int amount = itemObject.get("amount").toint();
-        Material material = Material.getMaterial(itemObject.get("material").toString());
-        return new ItemStack(material, amount);
-
-    }
-
-    private void setSlot(Inventory inventory) {
+				player.getEnderChest().setItem(slot, itemstack);
+				break;
+			default:
+				throw new LuaError("'" + inventoryType + "'" + " is not a valid inventory type");
+		}
 
 
-    }
+		return LuaValue.NIL;
+	}
+
+	private ItemStack deserializeItem(LuaValue itemObject) {
+		int amount = itemObject.get("amount").toint();
+		Material material = Material.getMaterial(itemObject.get("material").toString());
+		return new ItemStack(material, amount);
+
+	}
+
+	private void setSlot(Inventory inventory) {
+
+
+	}
 
 
 }

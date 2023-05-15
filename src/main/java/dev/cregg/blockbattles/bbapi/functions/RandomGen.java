@@ -10,12 +10,12 @@ import java.util.Random;
 import java.util.random.RandomGenerator;
 
 public class RandomGen extends TwoArgFunction {
-    @Override
-    public LuaValue call(LuaValue min, LuaValue max) {
-        Random rand = new Random();
+	@Override
+	public LuaValue call(LuaValue min, LuaValue max) {
+		Random rand = new Random();
 
 
-        return LuaValue.valueOf(rand.nextFloat(max.tofloat()) + min.tofloat());
-    }
+		return LuaValue.valueOf(rand.nextFloat(max.tofloat()) + min.tofloat());
+	}
 }
 

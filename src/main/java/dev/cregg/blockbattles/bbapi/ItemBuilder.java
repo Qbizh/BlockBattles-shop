@@ -8,21 +8,21 @@ public class ItemBuilder {
 
 
 
-    private String material;
-    private int amount;
+	private String material;
+	private int amount;
 
 
-    public ItemBuilder(ItemStack item) {
-        this.material = item.getType().toString();
-        this.amount = item.getAmount();
+	public ItemBuilder(ItemStack item) {
+		this.material = item.getType().toString();
+		this.amount = item.getAmount();
 
-    }
+	}
 
-    public LuaTable build() {
-        LuaTable table = new LuaTable();
+	public LuaTable build() {
+		LuaTable table = new LuaTable();
 
-        table.set("material", this.material);
-        table.set("amount", this.amount);
-        return table;
-    }
+		table.set("material", this.material);
+		table.set("amount", this.amount);
+		return table;
+	}
 }
