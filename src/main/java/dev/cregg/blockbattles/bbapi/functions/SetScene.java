@@ -2,6 +2,7 @@ package dev.cregg.blockbattles.bbapi.functions;
 
 
 
+import com.github.shynixn.structureblocklib.api.bukkit.StructureBlockLibApi;
 import dev.cregg.blockbattles.BlockListener;
 import dev.cregg.blockbattles.Blockbattles;
 import org.bukkit.Bukkit;
@@ -39,7 +40,9 @@ public class SetScene extends TwoArgFunction {
 		return LuaValue.NIL;
 	}
 
-	public static void placeStructure(World world, String structurename, int x, int y, int z) {
+	public static void _placeStructure(World world, String structurename, int x, int y, int z) {
+		System.out.println("Worldname: " + world.getName());
+		System.out.println("Structurename: " + structurename);
 
 		StructureManager manager = Bukkit.getStructureManager();
 		File file = Paths.get(Blockbattles.datapath, "scenes",structurename + ".nbt").toFile();
@@ -53,9 +56,24 @@ public class SetScene extends TwoArgFunction {
 			return;
 		}
 
-
+		System.out.println("structure:" + structure);
+		System.out.println("world:" + world);
+		System.out.println("x:" + x);
+		System.out.println("y:" + y);
+		System.out.println("z:" + z);
 		structure.place(new Location(world, x, y, z), false, StructureRotation.NONE, Mirror.NONE, 0, 1, new Random());
 		System.out.println("got here");
+	}
+
+	public static void placeStructure(World world, String structurename, int x, int y, int z) {
+		Path path = Blockbattles.plugin.getDataFolder().toPath().resolve("scenes").resolve(structurename + ".nbt");
+
+		StructureBlockLibApi.INSTANCE
+				.loadStructure(Blockbattles.plugin)
+				.at(new Location(world, 0, 0, 0))
+				.loadFromPath(path)
+				.onException(e -> Blockbattles.plugin.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
+				.onResult(e -> Blockbattles.plugin.getLogger().log(Level.INFO, ChatColor.GREEN + "Loaded structure '" + structurename +"'."));
 	}
 }
 

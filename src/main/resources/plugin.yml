@@ -18,3 +18,9 @@ commands:
     description: Configure your block battles deck
     usage: /blockdeck
     permission:
+  rules:
+    description: Get rules
+    usage: /rules
+    permission:
+
+

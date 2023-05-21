@@ -7,6 +7,8 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -71,6 +73,9 @@ public final class Blockbattles extends JavaPlugin {
 		return output;
 	}
 
+
+
+
 	private static HashMap<String, ItemStack[]> loadDecksFromFile() {
 		HashMap<String, ItemStack[]> output = new HashMap<>();
 
@@ -122,6 +127,8 @@ public final class Blockbattles extends JavaPlugin {
 		this.getCommand("duel").setExecutor(new DuelCommand());
 		this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
 		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
+		this.getCommand("rules").setExecutor(new RulesCommand());
+
 		getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
 		getServer().getPluginManager().registerEvents(shopGUI, this);
 
@@ -153,7 +160,15 @@ public final class Blockbattles extends JavaPlugin {
 
 
 
+
+
 		logger.log(Level.INFO, "Block battles unloaded");
+	}
+
+
+
+	private static void saveClans() {
+
 	}
 
 	public static void killAll(World world) {

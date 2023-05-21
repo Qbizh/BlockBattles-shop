@@ -20,7 +20,7 @@ import java.util.*;
 
 
 public class DuelCommand implements CommandExecutor {
-	public static List<String[]> playersInGame = new ArrayList<String[]>();
+	public static List<String[]> playersInGame;
 
 	private HashMap<String, String> outgoingChallengeList;
 	public static HashMap<String, Location> previousLocationList;
@@ -40,11 +40,13 @@ public class DuelCommand implements CommandExecutor {
 		previousHealthList = new HashMap<>();
 		previousHungerList = new HashMap<>();
 		gameIds = new HashMap<>();
+		playersInGame = new ArrayList<>();
 		gameTurns = new HashMap<>();
 
 	}
 
 	public static void endGame(String player) {
+		System.out.println("Tried to end game");
 		for (int i = 0; i < playersInGame.size(); i++) {
 			if(Arrays.asList(playersInGame.get(i)).contains(player)) {
 				playersInGame.remove(i);
@@ -92,6 +94,7 @@ public class DuelCommand implements CommandExecutor {
 				previousHealthList.put(player.getUniqueId().toString(), player.getHealth());
 				previousHungerList.put(player.getUniqueId().toString(), player.getFoodLevel());
 				gameIds.put(player.getUniqueId().toString(), gameIndex);
+				gameTurns.put(gameIndex, player.getUniqueId().toString());
 				if(!player.getUniqueId().equals(other.getUniqueId())) {
 					previousLocationList.put(other.getUniqueId().toString(), other.getLocation());
 					previousInventoryList.put(other.getUniqueId().toString(), other.getInventory().getContents());
@@ -145,7 +148,15 @@ public class DuelCommand implements CommandExecutor {
 	}
 
 	public static boolean isTurn(String uuid) {
-		return isInGame(uuid) && gameTurns.get(gameIds.get(uuid)).equals(uuid);
+		if(isInGame(uuid)) {
+			String turn = gameTurns.get(gameIds.get(uuid));
+			if(turn != null) {
+				return turn.equals(uuid);
+			}
+			System.out.println("uh uh");
+			System.out.println(gameTurns);
+		}
+		return false;
 	}
 
 	public static void switchTurn(int gameid) {

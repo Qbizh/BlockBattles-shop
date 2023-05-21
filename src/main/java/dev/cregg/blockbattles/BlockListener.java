@@ -1,9 +1,6 @@
 package dev.cregg.blockbattles;
 
-import dev.cregg.blockbattles.bbapi.BBAPIBuilder;
-import dev.cregg.blockbattles.bbapi.EntitySpawnEventBuilder;
-import dev.cregg.blockbattles.bbapi.PlaceEventBuilder;
-import dev.cregg.blockbattles.bbapi.StructureGrowEventBuilder;
+import dev.cregg.blockbattles.bbapi.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -16,6 +13,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -29,6 +30,7 @@ import org.luaj.vm2.LuaValue;
 
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class BlockListener implements Listener {
 				if (on_place != LuaValue.NIL) {
 					on_place.call(new PlaceEventBuilder(blockPlaceEvent).build());
 				}
-				DuelCommand.switchTurn(DuelCommand.gameIds.get(blockPlaceEvent.getPlayer().getUniqueId().toString()));
+
 			} else {
 				blockPlaceEvent.setCancelled(true);
 			}
@@ -76,7 +78,7 @@ public class BlockListener implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent blockBreakEvent) {
 		if(DuelCommand.isInGame(blockBreakEvent.getPlayer().getUniqueId().toString())) {
-			if(!inRange(blockBreakEvent.getBlock().getState().getLocation()) && !DuelCommand.isTurn(blockBreakEvent.getPlayer().getUniqueId().toString())) {
+			if(!inRange(blockBreakEvent.getBlock().getState().getLocation())) {
 				blockBreakEvent.setCancelled(true);
 			}
 		}
@@ -111,6 +113,9 @@ public class BlockListener implements Listener {
 	public void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		player.setScoreboard(createScoreboard(player));
+		if(!player.hasPlayedBefore()) {
+			RulesCommand.giveRules(player);
+		}
 	}
 
 	private Scoreboard createScoreboard(Player player) {
@@ -198,6 +203,7 @@ public class BlockListener implements Listener {
 				DuelCommand.previousInventoryList.remove(player.getUniqueId().toString());
 				DuelCommand.previousHungerList.remove(player.getUniqueId().toString());
 				DuelCommand.previousHealthList.remove(player.getUniqueId().toString());
+				DuelCommand.gameTurns.remove(DuelCommand.gameIds.get(player.getUniqueId().toString()));
 				DuelCommand.gameIds.remove(player.getUniqueId().toString());
 
 				player.sendMessage("yippee");
@@ -238,9 +244,12 @@ public class BlockListener implements Listener {
 					if(deck != null) {
 						for (ItemStack item : deck
 						) {
-							ItemStack modifyItem = item.clone();
-							modifyItem.getItemMeta().getLore().add("Item recieved from besting: " + player.getName());
-							other.getInventory().addItem(item);
+							if(item != null) {
+								ItemStack modifyItem = item.clone();
+
+								modifyItem.getItemMeta().getLore().add("Item received from besting: " + player.getName());
+								other.getInventory().addItem(item);
+							}
 						}
 						Blockbattles.decks.put(player.getUniqueId().toString(), new ItemStack[0]);
 					}
@@ -253,6 +262,7 @@ public class BlockListener implements Listener {
 		}
 
 	}
+
 
 
 	@EventHandler
@@ -281,11 +291,36 @@ public class BlockListener implements Listener {
 		if(event.getDamager() instanceof Player) {
 			Player attacker = (Player) event.getDamager();
 			if(event.getEntity() instanceof Player) {
-				Player attacked = (Player) event.getEntity();
-				attacker.performCommand("duel " + attacked.getName());
-				attacked.performCommand("duel " + attacker.getName());
+
+					Player attacked = (Player) event.getEntity();
+				if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) || !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
+					attacker.performCommand("duel " + attacked.getName());
+					attacked.performCommand("duel " + attacker.getName());
+				}
 			}
 		}
 	}
+
+	@EventHandler
+	public void onProjectile(ProjectileHitEvent event) {
+		World world = (event.getHitBlock() == null ? event.getHitEntity().getWorld():event.getHitBlock().getWorld());
+
+		List<Player> players = world.getPlayers();
+		boolean allInGame = true;
+		for (Player player:players
+		) {
+			if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
+				allInGame = false;
+			}
+		}
+		if(allInGame && players.size() > 0) {
+			LuaValue on_projectile = globals.get("on_projectile_hit");
+			if (on_projectile != LuaValue.NIL) {
+				on_projectile.call(new ProjectileHitEventBuilder(event).build());
+			}
+		}
+	}
+
+
 
 }

@@ -22,6 +22,8 @@ public class BBAPIBuilder {
 		table.set("settime", new SetTime());
 		table.set("setweather", new SetWeather());
 		table.set("setslot", new SetSlot());
+		table.set("switchturn", new SwitchTurn());
+		table.set("kill", new Kill());
 		return table;
 	}
 }
