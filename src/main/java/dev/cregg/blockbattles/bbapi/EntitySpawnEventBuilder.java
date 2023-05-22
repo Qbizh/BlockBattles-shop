@@ -17,6 +17,7 @@ public class EntitySpawnEventBuilder {
 
 	public EntitySpawnEventBuilder(EntitySpawnEvent event) {
 		this.entity = (new EntityBuilder(event.getEntity())).build();
+
 		Location location = event.getLocation();
 		this.x = location.getBlockX();
 		this.y = location.getBlockX();

@@ -1,10 +1,7 @@
 package dev.cregg.blockbattles;
 
 import dev.cregg.blockbattles.bbapi.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,16 +12,15 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
 import org.luaj.vm2.LuaValue;
 
@@ -113,8 +109,18 @@ public class BlockListener implements Listener {
 	public void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		player.setScoreboard(createScoreboard(player));
+		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+		BookMeta meta = (BookMeta) book.getItemMeta();
+		System.out.println(meta);
+		meta.setAuthor("blank");
+		meta.setTitle("blank");
+		meta.setPages("Welcome to BLOCKBATTLES development BETA!\nBugs are to be expected, let us know of anything you find!\n\nEmbark on an exciting journey through the vast world of Blockbattles, a thrilling multiplayer game that takes strategic gameplay to","new heights. Prepare for intense duels where your creativity knows no limits and the power of blocks reigns supreme. Engage in adrenaline-fueled combat, strategically placing and activating blocks to outsmart and overpower your opponents. Discover a variety of block", "cards, each with unique attributes, to construct fortresses, launch devastating attacks, or set up clever traps. Join the Blockbattles community today and immerse yourself in a world where Minecraft's potential is unlocked, and your strategic prowess becomes the key to victory. Are"," you ready to showcase your skills, rise to the challenge, and make your mark in the chronicles of Blockbattles history as the ultimate champion?");
+		book.setItemMeta(meta);
+		player.openBook(book);
 		if(!player.hasPlayedBefore()) {
 			RulesCommand.giveRules(player);
+
+
 		}
 	}
 
@@ -293,9 +299,15 @@ public class BlockListener implements Listener {
 			if(event.getEntity() instanceof Player) {
 
 					Player attacked = (Player) event.getEntity();
-				if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) || !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
-					attacker.performCommand("duel " + attacked.getName());
-					attacked.performCommand("duel " + attacker.getName());
+				if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) && !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
+					Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
+						if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) && !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
+							attacker.performCommand("duel " + attacked.getName());
+							attacked.performCommand("duel " + attacker.getName());
+						}
+					}, 20);
+				} else {
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -319,6 +331,20 @@ public class BlockListener implements Listener {
 				on_projectile.call(new ProjectileHitEventBuilder(event).build());
 			}
 		}
+	}
+	@EventHandler
+	public void onMove(PlayerMoveEvent event) {
+		if(DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
+		Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
+
+				if(!inRange(event.getTo()) && DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
+					System.out.println("Should kill");
+					event.getPlayer().setHealth(0);
+				}
+
+		}, 10);
+		}
+
 	}
 
 

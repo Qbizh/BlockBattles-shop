@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SpawnCategory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.structure.Structure;
@@ -115,6 +116,8 @@ public class DuelCommand implements CommandExecutor {
 
 				Blockbattles.killAll(world);
 				world.setStorm(false);
+				world.setTime(0);
+				world.setSpawnLimit(SpawnCategory.MONSTER, 0);
 				player.teleport(new Location(world, 5, 2, 5));
 				player.setHealth(20);
 				player.setFoodLevel(20);
@@ -132,6 +135,7 @@ public class DuelCommand implements CommandExecutor {
 				}
 				other.getInventory().setContents(otherContents);
 				SetScene.placeStructure(world, "defaultfield", 0, 0, 0);
+				SetScene.placeStructure(world, "arena", -15, -1, -16);
 				playersInGame.add(new String[] {player.getUniqueId().toString(), other.getUniqueId().toString()});
 
 

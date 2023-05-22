@@ -70,7 +70,7 @@ public class SetScene extends TwoArgFunction {
 
 		StructureBlockLibApi.INSTANCE
 				.loadStructure(Blockbattles.plugin)
-				.at(new Location(world, 0, 0, 0))
+				.at(new Location(world, x, y, z))
 				.loadFromPath(path)
 				.onException(e -> Blockbattles.plugin.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
 				.onResult(e -> Blockbattles.plugin.getLogger().log(Level.INFO, ChatColor.GREEN + "Loaded structure '" + structurename +"'."));
