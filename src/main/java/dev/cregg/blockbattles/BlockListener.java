@@ -2,6 +2,8 @@ package dev.cregg.blockbattles;
 
 import dev.cregg.blockbattles.bbapi.*;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,6 +52,8 @@ public class BlockListener implements Listener {
 		globals.set("BBAPI", BBAPI.getAPI());
 
 	}
+
+
 
 
 
@@ -134,11 +138,11 @@ public class BlockListener implements Listener {
 		Score first = objective.getScore("Wins");
 		Score second = objective.getScore("Losses");
 
-		String uuid = player.getUniqueId().toString();
-		PlayerData playergame = Blockbattles.gameData.get(uuid);
+		UUID uuid = player.getUniqueId();
+		PlayerData playergame = PlayerWins.gameData.get(uuid);
 		if(playergame == null) {
-			Blockbattles.gameData.put(player.getUniqueId().toString(), new PlayerData(0, 0));
-			playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+			PlayerWins.gameData.put(player.getUniqueId(), new PlayerData(0, 0));
+			playergame = PlayerWins.gameData.get(player.getUniqueId());
 		}
 
 		first.setScore(playergame.wins);
@@ -217,10 +221,10 @@ public class BlockListener implements Listener {
 				System.out.println("location here " + old);
 				System.out.println("other here " + other);
 
-				PlayerData playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+				PlayerData playergame = PlayerWins.gameData.get(player.getUniqueId());
 				if(playergame == null) {
-					Blockbattles.gameData.put(player.getUniqueId().toString(), new PlayerData(0, 0));
-					playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+					PlayerWins.gameData.put(player.getUniqueId(), new PlayerData(0, 0));
+					playergame = PlayerWins.gameData.get(player.getUniqueId());
 				}
 				playergame.addLoss();
 
@@ -237,10 +241,10 @@ public class BlockListener implements Listener {
 					DuelCommand.previousHealthList.remove(other.getUniqueId().toString());
 					DuelCommand.gameIds.remove(other.getUniqueId().toString());
 
-					PlayerData othergame = Blockbattles.gameData.get(other.getUniqueId().toString());
+					PlayerData othergame = PlayerWins.gameData.get(other.getUniqueId());
 					if (othergame == null) {
-						Blockbattles.gameData.put(other.getUniqueId().toString(), new PlayerData(0, 0));
-						othergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+						PlayerWins.gameData.put(other.getUniqueId(), new PlayerData(0, 0));
+						othergame = PlayerWins.gameData.get(player.getUniqueId());
 					}
 					othergame.addWin();
 

@@ -34,7 +34,8 @@ public final class Blockbattles extends JavaPlugin {
 
 	public static Map<Material, Material> trades;
 
-	public static HashMap<String, PlayerData> gameData;
+
+	public static PlayerWins playerWins;
 
 	public Blockbattles() {
 		super();
@@ -43,10 +44,11 @@ public final class Blockbattles extends JavaPlugin {
 		PLUGIN = this;
 		shopGUI = new ShopGUI();
 		config = this.getConfig();
-		gameData = loadGameData();
+
 
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
-
+		assert manager != null;
+		playerWins = new PlayerWins(manager);
 
 	}
 
@@ -54,21 +56,7 @@ public final class Blockbattles extends JavaPlugin {
 		config = config.getDefaults();
 	}
 
-	private static HashMap<String, PlayerData> loadGameData() {
-		File dataFile = new File(Blockbattles.datapath, "games.yml");
 
-		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-
-		HashMap<String, PlayerData> output = new HashMap();
-		Set<String> keys = data.getKeys(false);
-		for (String key:keys
-		) {
-			System.out.println("Game data: " + data.get(key));
-			//output.put(key, data.get(key)).;
-		}
-
-		return output;
-	}
 
 
 
@@ -138,14 +126,9 @@ public final class Blockbattles extends JavaPlugin {
 
 
 		File dataFile = new File(Blockbattles.datapath, "games.yml");
-		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-		for (String key: gameData.keySet()
-		) {
-			data.set(key, gameData.get(key));
-		}
 
 		try {
-			data.save(dataFile);
+			PlayerWins.serializeData().save(dataFile);
 			System.out.println("saved it at: " + dataFile.getAbsolutePath());
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
