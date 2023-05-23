@@ -128,6 +128,7 @@ public final class Blockbattles extends JavaPlugin {
 		this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
 		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
 		this.getCommand("rules").setExecutor(new RulesCommand());
+		this.getCommand("version").setExecutor(new VersionCommand());
 
 		getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
 		getServer().getPluginManager().registerEvents(shopGUI, this);
