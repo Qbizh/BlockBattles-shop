@@ -332,20 +332,20 @@ public class BlockListener implements Listener {
 			}
 		}
 	}
-	@EventHandler
-	public void onMove(PlayerMoveEvent event) {
-		if(DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
-		Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
-
-				if(!inRange(event.getTo()) && DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
-					System.out.println("Should kill");
-					event.getPlayer().setHealth(0);
-				}
-
-		}, 10);
-		}
-
-	}
+//	@EventHandler
+//	public void onMove(PlayerMoveEvent event) {
+//		if(DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
+//		Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
+//
+//				if(!inRange(event.getTo()) && DuelCommand.isInGame(event.getPlayer().getUniqueId().toString())) {
+//					System.out.println("Should kill");
+//					event.getPlayer().setHealth(0);
+//				}
+//
+//		}, 10);
+//		}
+//
+//	}
 
 
 
