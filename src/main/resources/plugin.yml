@@ -22,5 +22,9 @@ commands:
     description: Get rules
     usage: /rules
     permission:
+  version:
+    description: Get jar version
+    usage: /version
+    permission:
 
 
