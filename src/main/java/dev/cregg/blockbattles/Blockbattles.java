@@ -44,6 +44,7 @@ public final class Blockbattles extends JavaPlugin {
 
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
 		PlayerWins.init(manager);
+		DeckManager.init();
 
 	}
 

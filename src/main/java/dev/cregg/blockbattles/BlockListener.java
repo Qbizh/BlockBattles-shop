@@ -211,19 +211,19 @@ public class BlockListener implements Listener {
 				loser.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 
 
-				loser.setHealth(DuelCommand.previousHealthList.get(loser.getUniqueId().toString()));
-				loser.setFoodLevel(DuelCommand.previousHungerList.get(loser.getUniqueId().toString()));
-				loser.getInventory().setContents(DuelCommand.previousInventoryList.get(loser.getUniqueId().toString()));
+				loser.setHealth(DuelCommand.previousHealthList.get(loser.getUniqueId()));
+				loser.setFoodLevel(DuelCommand.previousHungerList.get(loser.getUniqueId()));
+				loser.getInventory().setContents(DuelCommand.previousInventoryList.get(loser.getUniqueId()));
 
-				DuelCommand.previousLocationList.remove(loser.getUniqueId().toString());
-				DuelCommand.previousInventoryList.remove(loser.getUniqueId().toString());
-				DuelCommand.previousHungerList.remove(loser.getUniqueId().toString());
-				DuelCommand.previousHealthList.remove(loser.getUniqueId().toString());
-				DuelCommand.gameTurns.remove(DuelCommand.gameIds.get(loser.getUniqueId().toString()));
-				DuelCommand.gameIds.remove(loser.getUniqueId().toString());
+				DuelCommand.previousLocationList.remove(loser.getUniqueId());
+				DuelCommand.previousInventoryList.remove(loser.getUniqueId());
+				DuelCommand.previousHungerList.remove(loser.getUniqueId());
+				DuelCommand.previousHealthList.remove(loser.getUniqueId());
+				DuelCommand.gameTurns.remove(DuelCommand.gameIds.get(loser.getUniqueId()));
+				DuelCommand.gameIds.remove(loser.getUniqueId());
 
 				loser.sendMessage("yippee");
-				Location old = DuelCommand.previousLocationList.get(other.getUniqueId().toString());
+				Location old = DuelCommand.previousLocationList.get(other.getUniqueId());
 				System.out.println("location here " + old);
 				System.out.println("other here " + other);
 
@@ -238,14 +238,14 @@ public class BlockListener implements Listener {
 				loser.setScoreboard(createScoreboard(loser));
 				if(!loser.getUniqueId().equals(other.getUniqueId())) {
 					other.teleport(old);
-					other.getInventory().setContents(DuelCommand.previousInventoryList.get(other.getUniqueId().toString()));
-					other.setHealth(DuelCommand.previousHealthList.get(other.getUniqueId().toString()));
-					other.setFoodLevel(DuelCommand.previousHungerList.get(other.getUniqueId().toString()));
-					DuelCommand.previousLocationList.remove(other.getUniqueId().toString());
-					DuelCommand.previousInventoryList.remove(other.getUniqueId().toString());
-					DuelCommand.previousHungerList.remove(other.getUniqueId().toString());
-					DuelCommand.previousHealthList.remove(other.getUniqueId().toString());
-					DuelCommand.gameIds.remove(other.getUniqueId().toString());
+					other.getInventory().setContents(DuelCommand.previousInventoryList.get(other.getUniqueId()));
+					other.setHealth(DuelCommand.previousHealthList.get(other.getUniqueId()));
+					other.setFoodLevel(DuelCommand.previousHungerList.get(other.getUniqueId()));
+					DuelCommand.previousLocationList.remove(other.getUniqueId());
+					DuelCommand.previousInventoryList.remove(other.getUniqueId());
+					DuelCommand.previousHungerList.remove(other.getUniqueId());
+					DuelCommand.previousHealthList.remove(other.getUniqueId());
+					DuelCommand.gameIds.remove(other.getUniqueId());
 
 					PlayerData othergame = PlayerWins.gameData.get(other.getUniqueId());
 					if (othergame == null) {
@@ -256,7 +256,7 @@ public class BlockListener implements Listener {
 
 					other.setScoreboard(createScoreboard(other));
 
-					ItemStack[] deck = DeckManager.decks.get(loser.getUniqueId().toString());
+					ItemStack[] deck = DeckManager.decks.get(loser.getUniqueId());
 					if(deck != null) {
 						for (ItemStack item : deck
 						) {

@@ -9,7 +9,7 @@ import java.util.*;
 
 public class DeckManager {
     public static HashMap<UUID, ItemStack[]> decks;
-    public DeckManager() {
+    public static void init() {
         decks = loadDecksFromFile();
     }
 

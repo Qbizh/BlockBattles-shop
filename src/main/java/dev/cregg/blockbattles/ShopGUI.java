@@ -54,7 +54,7 @@ public class ShopGUI implements Listener {
 	// You can open the inventory with this
 	public void openInventory(final HumanEntity ent) {
 		inv = Bukkit.createInventory(null, 9 * 1, "Block Deck");
-		ItemStack[] items = DeckManager.decks.get(ent.getUniqueId().toString());
+		ItemStack[] items = DeckManager.decks.get(ent.getUniqueId());
 		if(items != null) {
 			inv.setContents(items);
 		}
@@ -102,7 +102,7 @@ public class ShopGUI implements Listener {
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
 		if (e.getView().getTitle().equals("Block Deck")) {
-			DeckManager.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
+			DeckManager.decks.put(e.getPlayer().getUniqueId(), e.getInventory().getContents());
 			File dataFile = new File(Blockbattles.datapath, "decks.yml");
 			FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
 			data.set(e.getPlayer().getUniqueId().toString(), serializeInventory(e.getInventory().getContents()));

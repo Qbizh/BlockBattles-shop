@@ -59,7 +59,7 @@ public class BBAPI {
 
 		table.set("type", entity.getType().name().toString());
 		table.set("world", entity.getWorld().getName());
-		table.set("painting", paintingType);
+		table.set("painting", LuaValue.valueOf(paintingType));
 		return table;
 	}
 
@@ -85,7 +85,7 @@ public class BBAPI {
 		LuaTable table = new LuaTable();
 		table.set("material", event.getBlock().getBlockData().getMaterial().toString());
 		table.set("placer", player(event.getPlayer()));
-		table.set("opps", player(DuelCommand.getOpps(event.getPlayer().getUniqueId().toString())));
+		table.set("opps", player(DuelCommand.getOpps(event.getPlayer().getUniqueId())));
 		Location location = event.getBlock().getLocation();
 		table.set("x", location.getX());
 		table.set("y", location.getY());
@@ -139,7 +139,7 @@ public class BBAPI {
 		Player opps = null;
 		if(event.getEntity().getShooter() instanceof Player) {
 			launcher = (Player)event.getEntity().getShooter();
-			opps = DuelCommand.getOpps(launcher.getUniqueId().toString());
+			opps = DuelCommand.getOpps(launcher.getUniqueId());
 		}
 
 		String hitblock = null;
