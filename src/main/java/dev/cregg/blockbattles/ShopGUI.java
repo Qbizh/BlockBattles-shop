@@ -50,26 +50,11 @@ public class ShopGUI implements Listener {
 
 	}
 
-	// Nice little method to create a gui item with a custom name, and description
-	public static ItemStack createGuiItem(final Material material, final String... lore) {
-		final ItemStack item = new ItemStack(material, 1);
-		final ItemMeta meta = item.getItemMeta();
-
-		// Set the name of the item
-
-
-		// Set the lore of the item
-		meta.setLore(Arrays.asList(lore));
-
-		item.setItemMeta(meta);
-
-		return item;
-	}
 
 	// You can open the inventory with this
 	public void openInventory(final HumanEntity ent) {
 		inv = Bukkit.createInventory(null, 9 * 1, "Block Deck");
-		ItemStack[] items = Blockbattles.decks.get(ent.getUniqueId().toString());
+		ItemStack[] items = DeckManager.decks.get(ent.getUniqueId().toString());
 		if(items != null) {
 			inv.setContents(items);
 		}
@@ -117,7 +102,7 @@ public class ShopGUI implements Listener {
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
 		if (e.getView().getTitle().equals("Block Deck")) {
-			Blockbattles.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
+			DeckManager.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
 			File dataFile = new File(Blockbattles.datapath, "decks.yml");
 			FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
 			data.set(e.getPlayer().getUniqueId().toString(), serializeInventory(e.getInventory().getContents()));

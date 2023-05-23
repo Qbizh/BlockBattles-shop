@@ -13,7 +13,7 @@ public class PlayerWins {
 	public static Objective playerWins;
 	public static HashMap<UUID, PlayerData> gameData;
 
-	public PlayerWins(ScoreboardManager manager) {
+	public static void init(ScoreboardManager manager) {
 		Scoreboard board = manager.getNewScoreboard();
 		Objective objective = board.registerNewObjective("blockbattles", "dummy");
 		playerWins = objective;

@@ -23,32 +23,27 @@ import java.util.logging.Logger;
 public final class Blockbattles extends JavaPlugin {
 	Logger logger = Bukkit.getServer().getLogger();
 
+	public static boolean DEBUG_MODE = true;
+
 	public static Plugin PLUGIN;
-
 	public static Configuration config;
-
 	public static ShopGUI shopGUI;
-
-	public static HashMap<String, ItemStack[]> decks;
 	public static String datapath;
-
 	public static Map<Material, Material> trades;
-
-
 	public static PlayerWins playerWins;
 
 	public Blockbattles() {
 		super();
 		datapath = this.getDataFolder().getAbsolutePath();
-		decks = loadDecksFromFile();
 		PLUGIN = this;
 		shopGUI = new ShopGUI();
 		config = this.getConfig();
 
+		DEBUG_MODE = config.getBoolean("debug");
+
 
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		assert manager != null;
-		playerWins = new PlayerWins(manager);
+		PlayerWins.init(manager);
 
 	}
 
@@ -56,59 +51,12 @@ public final class Blockbattles extends JavaPlugin {
 		config = config.getDefaults();
 	}
 
-
-
-
-
-
-	private static HashMap<String, ItemStack[]> loadDecksFromFile() {
-		HashMap<String, ItemStack[]> output = new HashMap<>();
-
-		File dataFile = new File(Blockbattles.datapath, "decks.yml");
-
-		FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
-
-
-		Set<String> keys = data.getKeys(false);
-		for (String key:keys
-		) {
-			List<ItemStack> itemsList = new ArrayList<>();
-			for (Map<?, ?> item : data.getMapList(key)) { //Iterate across the List of Maps in the config
-				itemsList.add(ItemStack.deserialize((Map<String, Object>) item)); //Add the deserialized ItemStack to your List
-			}
-			ItemStack[] array = new ItemStack[itemsList.size()];
-			output.put(key, itemsList.toArray(array));
-		}
-
-		return output;
-	}
-
-	private static ItemStack[] listToItemArray(List<String> list) {
-		List<ItemStack> items = new ArrayList<>();
-		for (String item:list
-		) {
-
-
-
-			items.add(ShopGUI.createGuiItem(Material.valueOf(item), "To be used in block battles..."));
-
-
-
-
-		}
-		ItemStack[] array = new ItemStack[items.size()];
-
-		return items.toArray(array);
-	}
-
-
-
 	@Override
 	public void onEnable() {
 
 		// Plugin startup logic
-		logger.log(Level.INFO, "Block battles loaded");
-		logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
+		if(DEBUG_MODE) logger.log(Level.INFO, "Block battles loaded");
+		if(DEBUG_MODE) logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
 		this.getCommand("duel").setExecutor(new DuelCommand());
 		this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
 		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
@@ -123,33 +71,15 @@ public final class Blockbattles extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		// Plugin shutdown logic
-
-
-
-		File dataFile = new File(Blockbattles.datapath, "games.yml");
+		File gamesFile = new File(Blockbattles.datapath, "games.yml");
 
 		try {
-			PlayerWins.serializeData().save(dataFile);
-			System.out.println("saved it at: " + dataFile.getAbsolutePath());
+			PlayerWins.serializeData().save(gamesFile);
+			if(DEBUG_MODE) System.out.println("saved games data at: " + gamesFile.getAbsolutePath());
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
-
-
-
-
-
-
-
-
-
-		logger.log(Level.INFO, "Block battles unloaded");
-	}
-
-
-
-	private static void saveClans() {
-
+		if(DEBUG_MODE) logger.log(Level.INFO, "Block battles unloaded");
 	}
 
 	public static void killAll(World world) {

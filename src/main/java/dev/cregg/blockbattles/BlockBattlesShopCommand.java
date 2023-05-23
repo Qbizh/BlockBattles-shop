@@ -10,6 +10,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import static dev.cregg.blockbattles.Blockbattles.DEBUG_MODE;
+
 public class BlockBattlesShopCommand implements CommandExecutor {
 
 
@@ -18,8 +20,8 @@ public class BlockBattlesShopCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Player player = (Player) sender;
-		System.out.println("why does nothing ever work");
-		if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
+
+		if(!DuelCommand.isInGame(player.getUniqueId())) {
 			Blockbattles.shopGUI.openInventory(player);
 		}
 		return true;
