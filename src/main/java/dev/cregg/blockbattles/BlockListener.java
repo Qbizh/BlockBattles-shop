@@ -2,16 +2,15 @@ package dev.cregg.blockbattles;
 
 import dev.cregg.blockbattles.bbapi.*;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +24,7 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import org.luaj.vm2.LuaValue;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -272,10 +272,31 @@ public class BlockListener implements Listener {
 
 
 	@EventHandler
-	public void onEntitySpawn(EntitySpawnEvent event) {
+	public void _onEntitySpawn(EntitySpawnEvent event) {
+
+//		World world = event.getLocation().getWorld();
+//		List<Player> players = world.getPlayers();
+//		boolean allInGame = true;
+//		for (Player player:players
+//		) {
+//			if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
+//				allInGame = false;
+//			}
+//		}
+//		if(allInGame && players.size() > 0) {
+//			LuaValue on_spawn = globals.get("on_spawn");
+//			if (on_spawn != LuaValue.NIL) {
+//				on_spawn.call(new EntitySpawnEventBuilder(event).build());
+//			}
+//		}
+
+	}
+	@EventHandler
+	public void onEntitySpawn(CreatureSpawnEvent event) {
 
 		World world = event.getLocation().getWorld();
 		List<Player> players = world.getPlayers();
+
 		boolean allInGame = true;
 		for (Player player:players
 		) {
