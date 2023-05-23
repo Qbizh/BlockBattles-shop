@@ -3,7 +3,6 @@ package dev.cregg.blockbattles.bbapi.functions;
 
 
 import com.github.shynixn.structureblocklib.api.bukkit.StructureBlockLibApi;
-import dev.cregg.blockbattles.BlockListener;
 import dev.cregg.blockbattles.Blockbattles;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,7 +12,6 @@ import org.bukkit.block.structure.Mirror;
 import org.bukkit.block.structure.StructureRotation;
 import org.bukkit.structure.Structure;
 import org.bukkit.structure.StructureManager;
-import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.TwoArgFunction;
 
@@ -66,14 +64,14 @@ public class SetScene extends TwoArgFunction {
 	}
 
 	public static void placeStructure(World world, String structurename, int x, int y, int z) {
-		Path path = Blockbattles.plugin.getDataFolder().toPath().resolve("scenes").resolve(structurename + ".nbt");
+		Path path = Blockbattles.PLUGIN.getDataFolder().toPath().resolve("scenes").resolve(structurename + ".nbt");
 
 		StructureBlockLibApi.INSTANCE
-				.loadStructure(Blockbattles.plugin)
+				.loadStructure(Blockbattles.PLUGIN)
 				.at(new Location(world, x, y, z))
 				.loadFromPath(path)
-				.onException(e -> Blockbattles.plugin.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
-				.onResult(e -> Blockbattles.plugin.getLogger().log(Level.INFO, ChatColor.GREEN + "Loaded structure '" + structurename +"'."));
+				.onException(e -> Blockbattles.PLUGIN.getLogger().log(Level.SEVERE, "Failed to load structure.", e))
+				.onResult(e -> Blockbattles.PLUGIN.getLogger().log(Level.INFO, ChatColor.GREEN + "Loaded structure '" + structurename +"'."));
 	}
 }
 

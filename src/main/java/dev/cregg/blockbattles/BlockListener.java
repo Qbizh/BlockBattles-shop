@@ -38,16 +38,16 @@ public class BlockListener implements Listener {
 	public static void reloadLua() {
 		globals = JsePlatform.standardGlobals();
 		globals.get("dofile").call( LuaValue.valueOf( Paths.get(datapath, "script.lua").toString()));
-		globals.set("BBAPI", new BBAPIBuilder().build());
+		globals.set("BBAPI", BBAPI.getAPI());
 	}
 
 	private static String datapath = "";
 
-	public BlockListener(String path) {
+	public BlockListener() {
 		super();
 		datapath = Blockbattles.datapath;
 		globals.get("dofile").call( LuaValue.valueOf(  Paths.get(datapath, "script.lua").toString()));
-		globals.set("BBAPI", new BBAPIBuilder().build());
+		globals.set("BBAPI", BBAPI.getAPI());
 
 	}
 
@@ -62,7 +62,7 @@ public class BlockListener implements Listener {
 
 				LuaValue on_place = globals.get("on_place");
 				if (on_place != LuaValue.NIL) {
-					on_place.call(new PlaceEventBuilder(blockPlaceEvent).build());
+					on_place.call(BBAPI.placeEvent(blockPlaceEvent));
 				}
 
 			} else {
@@ -99,7 +99,7 @@ public class BlockListener implements Listener {
 		if(allInGame && players.size() > 0) {
 			LuaValue on_grow = globals.get("on_grow");
 			if (on_grow != LuaValue.NIL) {
-				on_grow.call(new StructureGrowEventBuilder(event).build());
+				on_grow.call(BBAPI.structureGrowEvent(event));
 			}
 		}
 
@@ -286,7 +286,7 @@ public class BlockListener implements Listener {
 		if(allInGame && players.size() > 0) {
 			LuaValue on_spawn = globals.get("on_spawn");
 			if (on_spawn != LuaValue.NIL) {
-				on_spawn.call(new EntitySpawnEventBuilder(event).build());
+				on_spawn.call(BBAPI.entitySpawnEvent(event));
 			}
 		}
 
@@ -328,7 +328,7 @@ public class BlockListener implements Listener {
 		if(allInGame && players.size() > 0) {
 			LuaValue on_projectile = globals.get("on_projectile_hit");
 			if (on_projectile != LuaValue.NIL) {
-				on_projectile.call(new ProjectileHitEventBuilder(event).build());
+				on_projectile.call(BBAPI.projectileHitEvent(event));
 			}
 		}
 	}

@@ -7,8 +7,6 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,8 +23,8 @@ import java.util.logging.Logger;
 public final class Blockbattles extends JavaPlugin {
 	Logger logger = Bukkit.getServer().getLogger();
 
-	public static Plugin plugin;
-	public static Objective playerWins;
+	public static Plugin PLUGIN;
+
 	public static Configuration config;
 
 	public static ShopGUI shopGUI;
@@ -42,15 +40,14 @@ public final class Blockbattles extends JavaPlugin {
 		super();
 		datapath = this.getDataFolder().getAbsolutePath();
 		decks = loadDecksFromFile();
-		plugin = this;
+		PLUGIN = this;
 		shopGUI = new ShopGUI();
 		config = this.getConfig();
 		gameData = loadGameData();
 
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		Scoreboard board = manager.getNewScoreboard();
-		Objective objective = board.registerNewObjective("blockbattles", "dummy");
-		playerWins = objective;
+
+
 	}
 
 	public static void defaultConfig() {
@@ -129,7 +126,7 @@ public final class Blockbattles extends JavaPlugin {
 		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
 		this.getCommand("rules").setExecutor(new RulesCommand());
 
-		getServer().getPluginManager().registerEvents(new BlockListener(this.getDataFolder().getAbsolutePath()), this);
+		getServer().getPluginManager().registerEvents(new BlockListener(), this);
 		getServer().getPluginManager().registerEvents(shopGUI, this);
 
 	}
