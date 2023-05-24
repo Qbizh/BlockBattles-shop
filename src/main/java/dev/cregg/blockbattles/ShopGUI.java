@@ -74,30 +74,7 @@ public class ShopGUI implements Listener {
 				e.setCancelled(true);
 			}
 		}
-//        if (!e.getInventory().equals(inv)) return;
-//
-//        e.setCancelled(true);
-//
-//        final ItemStack clickedItem = e.getCurrentItem();
-//
-//        // verify current item is not null
-//        if (clickedItem == null || clickedItem.getType().isAir()) return;
-//
-//        final Player p = (Player) e.getWhoClicked();
-//
-//        // Using slots click is a best option for your inventory click's
-//        p.sendMessage("You clicked at slot " + e.getRawSlot());
 	}
-
-	// Cancel dragging in our inventory
-//    @EventHandler
-//    public void onInventoryClick(final InventoryDragEvent e) {
-//        if (e.getView().getTitle().equals("Block Shop")) {
-//            if(!e//.getgetItemMeta().getLore().get(0).equals("To be used in block battles...")) {
-//                e.setCancelled(true);
-//            }
-//        }
-//    }
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {

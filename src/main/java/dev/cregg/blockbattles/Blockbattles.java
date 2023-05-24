@@ -4,14 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.io.File;
@@ -58,10 +53,10 @@ public final class Blockbattles extends JavaPlugin {
 		// Plugin startup logic
 		if(DEBUG_MODE) logger.log(Level.INFO, "Block battles loaded");
 		if(DEBUG_MODE) logger.log(Level.INFO, this.getDataFolder().getAbsolutePath());
-		this.getCommand("duel").setExecutor(new DuelCommand());
+		this.getCommand("duel").setExecutor(new DuelManager());
 		this.getCommand("reloadlua").setExecutor(new ReloadLuaCommand());
 		this.getCommand("blockdeck").setExecutor(new BlockBattlesShopCommand());
-		this.getCommand("rules").setExecutor(new RulesCommand());
+		//this.getCommand("rules").setExecutor(new RulesCommand());
 		this.getCommand("version").setExecutor(new VersionCommand());
 
 		getServer().getPluginManager().registerEvents(new BlockListener(), this);

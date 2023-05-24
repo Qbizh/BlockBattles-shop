@@ -8,46 +8,25 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpawnCategory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.structure.Structure;
-import org.bukkit.structure.StructureManager;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.*;
 
+import static dev.cregg.blockbattles.Blockbattles.DEBUG_MODE;
 
-public class DuelCommand implements CommandExecutor {
-	public static List<UUID[]> playersInGame;
 
-	private HashMap<UUID, UUID> outgoingChallengeList;
-	public static HashMap<UUID, Location> previousLocationList;
-	public static HashMap<UUID, ItemStack[]> previousInventoryList;
-	public static HashMap<UUID, Double> previousHealthList;
-	public static HashMap<UUID, Integer> previousHungerList;
-	public static HashMap<UUID, Integer> gameIds;
-	public static HashMap<Integer, UUID> gameTurns;
+public class DuelManager implements CommandExecutor {
+	public static List<UUID[]> playersInGame = new ArrayList<>();
+
+	private HashMap<UUID, UUID> outgoingChallenges = new HashMap<>();
+	public static HashMap<UUID, PlayerStatus> previousStatus = new HashMap<>();
+	public static HashMap<UUID, Integer> gameIds = new HashMap<>();
+	public static HashMap<Integer, UUID> gameTurns = new HashMap<>();
+
 	private static int gameIndex = 0;
 
-
-	public DuelCommand() {
-		super();
-		this.outgoingChallengeList = new HashMap<>();
-		previousLocationList = new HashMap<>();
-		previousInventoryList = new HashMap<>();
-		previousHealthList = new HashMap<>();
-		previousHungerList = new HashMap<>();
-		gameIds = new HashMap<>();
-		playersInGame = new ArrayList<>();
-		gameTurns = new HashMap<>();
-
-	}
-
-	public static void endGame(String player) {
-		System.out.println("Tried to end game");
+	public static void endGame(UUID player) {
+		if(DEBUG_MODE) System.out.println("Tried to end game");
 		for (int i = 0; i < playersInGame.size(); i++) {
 			if(Arrays.asList(playersInGame.get(i)).contains(player)) {
 				playersInGame.remove(i);
@@ -56,24 +35,32 @@ public class DuelCommand implements CommandExecutor {
 		}
 	}
 
-	// This method is called, when somebody uses our command
+	// This method is called, when /duel is used
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		//check if this is a player and if they have selected a player to duel
 		if(sender instanceof Player && args.length == 1) {
 
 			Player player = (Player) sender;
 			Player other = Bukkit.getPlayer(args[0]);
 
+			//check if the player is already in game
 			if(isInGame(player.getUniqueId())) {
 				player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You are already in game!");
 			}
-			if(outgoingChallengeList.containsKey(player.getUniqueId())) {
-				this.outgoingChallengeList.remove(player.getUniqueId());
+
+			//Check if the player already has been challenged
+			if(outgoingChallenges.containsKey(player.getUniqueId())) {
+				this.outgoingChallenges.remove(player.getUniqueId());
 				other.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "You accepted " + other.getDisplayName() + "'s duel request");
+
+				//Creating a world is costly so this section of code tries to optimize it
 				World world = Bukkit.getWorld(other.getUniqueId().toString());
 				World altWorld;
+				//If your opponent doesn't have a world
 				if(world == null) {
 					altWorld = Bukkit.getWorld(player.getUniqueId().toString());
+					//If you don't have a world too then you actually generate a world
 					if(altWorld == null) {
 						WorldCreator wc = new WorldCreator(other.getUniqueId().toString());
 
@@ -86,44 +73,45 @@ public class DuelCommand implements CommandExecutor {
 						world = Bukkit.getWorld(other.getUniqueId().toString());
 
 					} else {
+						//If you do have a world use that one
 						world = altWorld;
 					}
 				}
 
-				previousLocationList.put(player.getUniqueId(), player.getLocation());
-				previousInventoryList.put(player.getUniqueId(), player.getInventory().getContents());
-				previousHealthList.put(player.getUniqueId(), player.getHealth());
-				previousHungerList.put(player.getUniqueId(), player.getFoodLevel());
+				//save the status of the player and initialize the turn of a player
+				previousStatus.put(player.getUniqueId(), new PlayerStatus(player));
 				gameIds.put(player.getUniqueId(), gameIndex);
 				gameTurns.put(gameIndex, player.getUniqueId());
 				if(!player.getUniqueId().equals(other.getUniqueId())) {
-					previousLocationList.put(other.getUniqueId(), other.getLocation());
-					previousInventoryList.put(other.getUniqueId(), other.getInventory().getContents());
-					previousHealthList.put(other.getUniqueId(), other.getHealth());
-					previousHungerList.put(other.getUniqueId(), other.getFoodLevel());
+					previousStatus.put(other.getUniqueId(), new PlayerStatus(other));
 					gameIds.put(other.getUniqueId(), gameIndex);
 				}
+				//Gameindex sequentially identifies each game
 				gameIndex++;
 
-				for(int x = -5; x < 10; x++){
-					for(int y = -5; y < 10; y++){
-						for(int z = -5; z < 10; z++){
+				//Empty the world
+				for(int x = -5; x < 10; x++) {
+					for (int y = -5; y < 10; y++) {
+						for (int z = -5; z < 10; z++) {
 							Block block = world.getBlockAt(x, y, z);
 							block.setType(Material.AIR);
 						}
 					}
 				}
-
 				Blockbattles.killAll(world);
 				world.setStorm(false);
 				world.setTime(0);
 				world.setSpawnLimit(SpawnCategory.MONSTER, 0);
+
+				//Teleport the player to the world and heal and feed them
 				player.teleport(new Location(world, 5, 2, 5));
 				player.setHealth(20);
 				player.setFoodLevel(20);
 				other.teleport(new Location(world, 5, 2, 5));
 				other.setHealth(20);
 				other.setFoodLevel(20);
+
+				//Replace contents of player inventories with their decks
 				ItemStack[] playerContents = DeckManager.decks.get(player.getUniqueId());
 				if(playerContents == null) {
 					playerContents = new ItemStack[] {};
@@ -134,15 +122,20 @@ public class DuelCommand implements CommandExecutor {
 					otherContents = new ItemStack[] {};
 				}
 				other.getInventory().setContents(otherContents);
+
+				//Put down the field and arena
 				SetScene.placeStructure(world, "defaultfield", 0, 0, 0);
 				SetScene.placeStructure(world, "arena", -15, -1, -16);
+
+				//Keep track of who is in game and against who
 				playersInGame.add(new UUID[] {player.getUniqueId(), other.getUniqueId()});
 
 
 
 			} else {
+				//Notify the other player that they have been challenged to a duel
 				other.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + player.getDisplayName() + " challenged you to a duel");
-				outgoingChallengeList.put(other.getUniqueId(), player.getUniqueId());
+				outgoingChallenges.put(other.getUniqueId(), player.getUniqueId());
 			}
 		} else {
 			return false;
@@ -151,13 +144,14 @@ public class DuelCommand implements CommandExecutor {
 		return true;
 	}
 
+	//Check if it is a player's turn
 	public static boolean isTurn(UUID uuid) {
+		//If they aren't in game it isn't their turn
 		if(isInGame(uuid)) {
 			UUID turn = gameTurns.get(gameIds.get(uuid));
 			if(turn != null) {
 				return turn.equals(uuid);
 			}
-			System.out.println("uh uh");
 			System.out.println(gameTurns);
 		}
 		return false;
@@ -181,6 +175,7 @@ public class DuelCommand implements CommandExecutor {
 		return false;
 	}
 
+	//Get the opponent of a player
 	public static Player getOpps(UUID uuid) {
 
 		Player opp = null;
@@ -190,7 +185,7 @@ public class DuelCommand implements CommandExecutor {
 
 				if(game[i].equals(uuid)) {
 					int idx = 0;
-
+					//get the other player in the game
 					switch(i) {
 						case 0:
 							idx = 1;
@@ -208,7 +203,7 @@ public class DuelCommand implements CommandExecutor {
 
 			}
 		}
-		System.out.println("opp of:" + Bukkit.getPlayer(uuid).getName() + " is " + opp.getName());
+
 		return opp;
 	}
 

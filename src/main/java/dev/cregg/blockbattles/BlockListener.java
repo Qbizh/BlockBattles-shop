@@ -2,8 +2,6 @@ package dev.cregg.blockbattles;
 
 import dev.cregg.blockbattles.bbapi.*;
 import org.bukkit.*;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,18 +17,16 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
-import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
 import org.luaj.vm2.LuaValue;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.List;
 
 public class BlockListener implements Listener {
+
 	Logger logger = Bukkit.getServer().getLogger();
 
 	public static LuaValue globals = JsePlatform.standardGlobals();
@@ -57,11 +53,11 @@ public class BlockListener implements Listener {
 	public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
 
 		//call the function MyAdd with two parameters 5, and 5
-		if(DuelCommand.isInGame(blockPlaceEvent.getPlayer().getUniqueId())) {
+		if(DuelManager.isInGame(blockPlaceEvent.getPlayer().getUniqueId())) {
 			if (inRange(blockPlaceEvent.getBlock().getState().getLocation()) &&
 					blockPlaceEvent.getItemInHand().getItemMeta().getLore() != null &&
 					blockPlaceEvent.getItemInHand().getItemMeta().getLore().get(0).equals("To be used in block battles...") &&
-					DuelCommand.isTurn(blockPlaceEvent.getPlayer().getUniqueId())) {
+					DuelManager.isTurn(blockPlaceEvent.getPlayer().getUniqueId())) {
 
 				LuaValue on_place = globals.get("on_place");
 				if (on_place != LuaValue.NIL) {
@@ -76,7 +72,7 @@ public class BlockListener implements Listener {
 
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent blockBreakEvent) {
-		if(DuelCommand.isInGame(blockBreakEvent.getPlayer().getUniqueId())) {
+		if(DuelManager.isInGame(blockBreakEvent.getPlayer().getUniqueId())) {
 			if(!inRange(blockBreakEvent.getBlock().getState().getLocation())) {
 				blockBreakEvent.setCancelled(true);
 			}
@@ -95,7 +91,7 @@ public class BlockListener implements Listener {
 		boolean allInGame = true;
 		for (Player player:players
 		) {
-			if(!DuelCommand.isInGame(player.getUniqueId())) {
+			if(!DuelManager.isInGame(player.getUniqueId())) {
 				allInGame = false;
 			}
 		}
@@ -202,31 +198,24 @@ public class BlockListener implements Listener {
 
 	@EventHandler
 	public void onSpawn(PlayerRespawnEvent event) {
+		//Whoever respawned first must be the loser
 		Player loser = event.getPlayer();
-		if(DuelCommand.isInGame(loser.getUniqueId())) {
-			Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
-				Player other = DuelCommand.getOpps(loser.getUniqueId());
-				System.out.println("Map here: " +  DuelCommand.previousLocationList.toString());
+		if(DuelManager.isInGame(loser.getUniqueId())) {
+				//Whoever their opponent is then must be the winner
+				Player winner = DuelManager.getOpps(loser.getUniqueId());
 
+				//return the loser to spawn
 				loser.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 
+				//restore player to how they were before the match
+				DuelManager.previousStatus.get(loser.getUniqueId()).restoreWithoutTeleport(loser);
 
-				loser.setHealth(DuelCommand.previousHealthList.get(loser.getUniqueId()));
-				loser.setFoodLevel(DuelCommand.previousHungerList.get(loser.getUniqueId()));
-				loser.getInventory().setContents(DuelCommand.previousInventoryList.get(loser.getUniqueId()));
+				// remove their data
+				DuelManager.previousStatus.remove(loser.getUniqueId());
+				DuelManager.gameTurns.remove(DuelManager.gameIds.get(loser.getUniqueId()));
+				DuelManager.gameIds.remove(loser.getUniqueId());
 
-				DuelCommand.previousLocationList.remove(loser.getUniqueId());
-				DuelCommand.previousInventoryList.remove(loser.getUniqueId());
-				DuelCommand.previousHungerList.remove(loser.getUniqueId());
-				DuelCommand.previousHealthList.remove(loser.getUniqueId());
-				DuelCommand.gameTurns.remove(DuelCommand.gameIds.get(loser.getUniqueId()));
-				DuelCommand.gameIds.remove(loser.getUniqueId());
-
-				loser.sendMessage("yippee");
-				Location old = DuelCommand.previousLocationList.get(other.getUniqueId());
-				System.out.println("location here " + old);
-				System.out.println("other here " + other);
-
+				//Add a loss to the loser's score
 				PlayerData playergame = PlayerWins.gameData.get(loser.getUniqueId());
 				if(playergame == null) {
 					PlayerWins.gameData.put(loser.getUniqueId(), new PlayerData(0, 0));
@@ -234,28 +223,29 @@ public class BlockListener implements Listener {
 				}
 				playergame.addLoss();
 
-
+				//refresh gui scoreboard
 				loser.setScoreboard(createScoreboard(loser));
-				if(!loser.getUniqueId().equals(other.getUniqueId())) {
-					other.teleport(old);
-					other.getInventory().setContents(DuelCommand.previousInventoryList.get(other.getUniqueId()));
-					other.setHealth(DuelCommand.previousHealthList.get(other.getUniqueId()));
-					other.setFoodLevel(DuelCommand.previousHungerList.get(other.getUniqueId()));
-					DuelCommand.previousLocationList.remove(other.getUniqueId());
-					DuelCommand.previousInventoryList.remove(other.getUniqueId());
-					DuelCommand.previousHungerList.remove(other.getUniqueId());
-					DuelCommand.previousHealthList.remove(other.getUniqueId());
-					DuelCommand.gameIds.remove(other.getUniqueId());
 
-					PlayerData othergame = PlayerWins.gameData.get(other.getUniqueId());
+				//Check if the winner and loser are the same player
+				if(!loser.getUniqueId().equals(winner.getUniqueId())) {
+
+					//Return winner to their original position before the match and return their player data back
+					DuelManager.previousStatus.get(winner.getUniqueId()).restore(winner);
+					DuelManager.previousStatus.remove(winner.getUniqueId());
+					DuelManager.gameIds.remove(winner.getUniqueId());
+
+					//Add a win to the winner's score
+					PlayerData othergame = PlayerWins.gameData.get(winner.getUniqueId());
 					if (othergame == null) {
-						PlayerWins.gameData.put(other.getUniqueId(), new PlayerData(0, 0));
+						PlayerWins.gameData.put(winner.getUniqueId(), new PlayerData(0, 0));
 						othergame = PlayerWins.gameData.get(loser.getUniqueId());
 					}
 					othergame.addWin();
 
-					other.setScoreboard(createScoreboard(other));
+					//refresh gui scoreboard
+					winner.setScoreboard(createScoreboard(winner));
 
+					//Give the winning player the losing player's deck
 					ItemStack[] deck = DeckManager.decks.get(loser.getUniqueId());
 					if(deck != null) {
 						for (ItemStack item : deck
@@ -264,16 +254,18 @@ public class BlockListener implements Listener {
 								ItemStack modifyItem = item.clone();
 
 								modifyItem.getItemMeta().getLore().add("Item received from besting: " + loser.getName());
-								other.getInventory().addItem(item);
+
+								winner.getInventory().addItem(modifyItem);
 							}
 						}
 						DeckManager.decks.put(loser.getUniqueId(), new ItemStack[0]);
 					}
 				}
-				DuelCommand.endGame(loser.getUniqueId().toString());
+				//Cleanup all remaining game data
+				DuelManager.endGame(loser.getUniqueId());
 
 
-			}, 10);
+			
 
 		}
 
@@ -322,9 +314,9 @@ public class BlockListener implements Listener {
 			if(event.getEntity() instanceof Player) {
 
 					Player attacked = (Player) event.getEntity();
-				if((!DuelCommand.isInGame(attacker.getUniqueId()) && !DuelCommand.isInGame(attacked.getUniqueId()))) {
+					if((!DuelManager.isInGame(attacker.getUniqueId()) && !DuelManager.isInGame(attacked.getUniqueId()))) {
 					Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
-						if((!DuelCommand.isInGame(attacker.getUniqueId()) && !DuelCommand.isInGame(attacked.getUniqueId()))) {
+						if((!DuelManager.isInGame(attacker.getUniqueId()) && !DuelManager.isInGame(attacked.getUniqueId()))) {
 							attacker.performCommand("duel " + attacked.getName());
 							attacked.performCommand("duel " + attacker.getName());
 						}

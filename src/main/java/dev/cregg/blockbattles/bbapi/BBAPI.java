@@ -1,6 +1,6 @@
 package dev.cregg.blockbattles.bbapi;
 
-import dev.cregg.blockbattles.DuelCommand;
+import dev.cregg.blockbattles.DuelManager;
 import dev.cregg.blockbattles.bbapi.functions.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,7 +15,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.projectiles.ProjectileSource;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
@@ -85,7 +84,7 @@ public class BBAPI {
 		LuaTable table = new LuaTable();
 		table.set("material", event.getBlock().getBlockData().getMaterial().toString());
 		table.set("placer", player(event.getPlayer()));
-		table.set("opps", player(DuelCommand.getOpps(event.getPlayer().getUniqueId())));
+		table.set("opps", player(DuelManager.getOpps(event.getPlayer().getUniqueId())));
 		Location location = event.getBlock().getLocation();
 		table.set("x", location.getX());
 		table.set("y", location.getY());
@@ -139,7 +138,7 @@ public class BBAPI {
 		Player opps = null;
 		if(event.getEntity().getShooter() instanceof Player) {
 			launcher = (Player)event.getEntity().getShooter();
-			opps = DuelCommand.getOpps(launcher.getUniqueId());
+			opps = DuelManager.getOpps(launcher.getUniqueId());
 		}
 
 		String hitblock = null;
