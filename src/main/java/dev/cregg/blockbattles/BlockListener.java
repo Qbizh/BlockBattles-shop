@@ -2,6 +2,8 @@ package dev.cregg.blockbattles;
 
 import dev.cregg.blockbattles.bbapi.*;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,6 +23,9 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import org.luaj.vm2.LuaValue;
 
 import java.nio.file.Paths;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.List;
@@ -299,6 +304,7 @@ public class BlockListener implements Listener {
 		World world = event.getLocation().getWorld();
 
 		if(gameWorld(world)) {
+
 			LuaValue on_spawn = globals.get("on_spawn");
 			if (on_spawn != LuaValue.NIL) {
 				on_spawn.call(BBAPI.entitySpawnEvent(event));
