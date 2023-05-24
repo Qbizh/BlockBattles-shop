@@ -50,26 +50,11 @@ public class ShopGUI implements Listener {
 
 	}
 
-	// Nice little method to create a gui item with a custom name, and description
-	public static ItemStack createGuiItem(final Material material, final String... lore) {
-		final ItemStack item = new ItemStack(material, 1);
-		final ItemMeta meta = item.getItemMeta();
-
-		// Set the name of the item
-
-
-		// Set the lore of the item
-		meta.setLore(Arrays.asList(lore));
-
-		item.setItemMeta(meta);
-
-		return item;
-	}
 
 	// You can open the inventory with this
 	public void openInventory(final HumanEntity ent) {
 		inv = Bukkit.createInventory(null, 9 * 1, "Block Deck");
-		ItemStack[] items = Blockbattles.decks.get(ent.getUniqueId().toString());
+		ItemStack[] items = DeckManager.decks.get(ent.getUniqueId());
 		if(items != null) {
 			inv.setContents(items);
 		}
@@ -89,35 +74,12 @@ public class ShopGUI implements Listener {
 				e.setCancelled(true);
 			}
 		}
-//        if (!e.getInventory().equals(inv)) return;
-//
-//        e.setCancelled(true);
-//
-//        final ItemStack clickedItem = e.getCurrentItem();
-//
-//        // verify current item is not null
-//        if (clickedItem == null || clickedItem.getType().isAir()) return;
-//
-//        final Player p = (Player) e.getWhoClicked();
-//
-//        // Using slots click is a best option for your inventory click's
-//        p.sendMessage("You clicked at slot " + e.getRawSlot());
 	}
-
-	// Cancel dragging in our inventory
-//    @EventHandler
-//    public void onInventoryClick(final InventoryDragEvent e) {
-//        if (e.getView().getTitle().equals("Block Shop")) {
-//            if(!e//.getgetItemMeta().getLore().get(0).equals("To be used in block battles...")) {
-//                e.setCancelled(true);
-//            }
-//        }
-//    }
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
 		if (e.getView().getTitle().equals("Block Deck")) {
-			Blockbattles.decks.put(e.getPlayer().getUniqueId().toString(), e.getInventory().getContents());
+			DeckManager.decks.put(e.getPlayer().getUniqueId(), e.getInventory().getContents());
 			File dataFile = new File(Blockbattles.datapath, "decks.yml");
 			FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
 			data.set(e.getPlayer().getUniqueId().toString(), serializeInventory(e.getInventory().getContents()));

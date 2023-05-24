@@ -19,11 +19,11 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
-import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
 import org.luaj.vm2.LuaValue;
 
 import java.nio.file.Paths;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,25 +31,26 @@ import java.util.logging.Logger;
 import java.util.List;
 
 public class BlockListener implements Listener {
+
 	Logger logger = Bukkit.getServer().getLogger();
 
 	public static LuaValue globals = JsePlatform.standardGlobals();
 
 	public static void reloadLua() {
 		globals = JsePlatform.standardGlobals();
-		globals.get("dofile").call( LuaValue.valueOf( Paths.get(datapath, "script.lua").toString()));
-		globals.set("BBAPI", new BBAPIBuilder().build());
+		globals.get("dofile").call( LuaValue.valueOf( Paths.get(Blockbattles.datapath, "script.lua").toString()));
+		globals.set("BBAPI", BBAPI.getAPI());
 	}
 
-	private static String datapath = "";
 
-	public BlockListener(String path) {
+
+	public BlockListener() {
 		super();
-		datapath = Blockbattles.datapath;
-		globals.get("dofile").call( LuaValue.valueOf(  Paths.get(datapath, "script.lua").toString()));
-		globals.set("BBAPI", new BBAPIBuilder().build());
+		reloadLua();
 
 	}
+
+
 
 
 
@@ -57,12 +58,15 @@ public class BlockListener implements Listener {
 	public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
 
 		//call the function MyAdd with two parameters 5, and 5
-		if(DuelCommand.isInGame(blockPlaceEvent.getPlayer().getUniqueId().toString())) {
-			if (inRange(blockPlaceEvent.getBlock().getState().getLocation()) &&blockPlaceEvent.getItemInHand().getItemMeta().getLore() != null && blockPlaceEvent.getItemInHand().getItemMeta().getLore().get(0).equals("To be used in block battles...") && DuelCommand.isTurn(blockPlaceEvent.getPlayer().getUniqueId().toString())) {
+		if(DuelManager.isInGame(blockPlaceEvent.getPlayer().getUniqueId())) {
+			if (inRange(blockPlaceEvent.getBlock().getState().getLocation()) &&
+					blockPlaceEvent.getItemInHand().getItemMeta().getLore() != null &&
+					blockPlaceEvent.getItemInHand().getItemMeta().getLore().get(0).equals("To be used in block battles...") &&
+					DuelManager.isTurn(blockPlaceEvent.getPlayer().getUniqueId())) {
 
 				LuaValue on_place = globals.get("on_place");
 				if (on_place != LuaValue.NIL) {
-					on_place.call(new PlaceEventBuilder(blockPlaceEvent).build());
+					on_place.call(BBAPI.placeEvent(blockPlaceEvent));
 				}
 
 			} else {
@@ -73,7 +77,7 @@ public class BlockListener implements Listener {
 
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent blockBreakEvent) {
-		if(DuelCommand.isInGame(blockBreakEvent.getPlayer().getUniqueId().toString())) {
+		if(DuelManager.isInGame(blockBreakEvent.getPlayer().getUniqueId())) {
 			if(!inRange(blockBreakEvent.getBlock().getState().getLocation())) {
 				blockBreakEvent.setCancelled(true);
 			}
@@ -82,24 +86,31 @@ public class BlockListener implements Listener {
 
 	public static boolean inRange(Location location) {
 
-		return location.getX() >= 1 && location.getX() <= 8 && location.getZ() >= 1 && location.getZ() <= 8 && location.getY() >= 1;
+		return location.getX() >= 1 && location.getX() <= 8 &&
+				location.getZ() >= 1 && location.getZ() <= 8 &&
+				location.getY() >= 1;
+	}
+
+	private static boolean gameWorld(World world) {
+		List<Player> players = world.getPlayers();
+		boolean allInGame = true;
+		for (Player player:players
+		) {
+			if(!DuelManager.isInGame(player.getUniqueId())) {
+				allInGame = false;
+			}
+		}
+		return allInGame && players.size() > 0;
 	}
 
 	@EventHandler
 	public void onStructureGrow(StructureGrowEvent event) {
 		World world = event.getLocation().getWorld();
-		List<Player> players = world.getPlayers();
-		boolean allInGame = true;
-		for (Player player:players
-		) {
-			if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
-				allInGame = false;
-			}
-		}
-		if(allInGame && players.size() > 0) {
+
+		if(gameWorld(world)) {
 			LuaValue on_grow = globals.get("on_grow");
 			if (on_grow != LuaValue.NIL) {
-				on_grow.call(new StructureGrowEventBuilder(event).build());
+				on_grow.call(BBAPI.structureGrowEvent(event));
 			}
 		}
 
@@ -134,11 +145,11 @@ public class BlockListener implements Listener {
 		Score first = objective.getScore("Wins");
 		Score second = objective.getScore("Losses");
 
-		String uuid = player.getUniqueId().toString();
-		PlayerData playergame = Blockbattles.gameData.get(uuid);
+		UUID uuid = player.getUniqueId();
+		PlayerData playergame = PlayerWins.gameData.get(uuid);
 		if(playergame == null) {
-			Blockbattles.gameData.put(player.getUniqueId().toString(), new PlayerData(0, 0));
-			playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+			PlayerWins.gameData.put(player.getUniqueId(), new PlayerData(0, 0));
+			playergame = PlayerWins.gameData.get(player.getUniqueId());
 		}
 
 		first.setScore(playergame.wins);
@@ -192,78 +203,74 @@ public class BlockListener implements Listener {
 
 	@EventHandler
 	public void onSpawn(PlayerRespawnEvent event) {
-		Player player = event.getPlayer();
-		if(DuelCommand.isInGame(player.getUniqueId().toString())) {
-			Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
-				Player other = DuelCommand.getOpps(player.getUniqueId().toString());
-				System.out.println("Map here: " +  DuelCommand.previousLocationList.toString());
+		//Whoever respawned first must be the loser
+		Player loser = event.getPlayer();
+		if(DuelManager.isInGame(loser.getUniqueId())) {
+				//Whoever their opponent is then must be the winner
+				Player winner = DuelManager.getOpps(loser.getUniqueId());
 
-				player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+				//return the loser to spawn
+				loser.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 
+				//restore player to how they were before the match
+				DuelManager.previousStatus.get(loser.getUniqueId()).restoreWithoutTeleport(loser);
 
-				player.setHealth(DuelCommand.previousHealthList.get(player.getUniqueId().toString()));
-				player.setFoodLevel(DuelCommand.previousHungerList.get(player.getUniqueId().toString()));
-				player.getInventory().setContents(DuelCommand.previousInventoryList.get(player.getUniqueId().toString()));
+				// remove their data
+				DuelManager.previousStatus.remove(loser.getUniqueId());
+				DuelManager.gameTurns.remove(DuelManager.gameIds.get(loser.getUniqueId()));
+				DuelManager.gameIds.remove(loser.getUniqueId());
 
-				DuelCommand.previousLocationList.remove(player.getUniqueId().toString());
-				DuelCommand.previousInventoryList.remove(player.getUniqueId().toString());
-				DuelCommand.previousHungerList.remove(player.getUniqueId().toString());
-				DuelCommand.previousHealthList.remove(player.getUniqueId().toString());
-				DuelCommand.gameTurns.remove(DuelCommand.gameIds.get(player.getUniqueId().toString()));
-				DuelCommand.gameIds.remove(player.getUniqueId().toString());
-
-				player.sendMessage("yippee");
-				Location old = DuelCommand.previousLocationList.get(other.getUniqueId().toString());
-				System.out.println("location here " + old);
-				System.out.println("other here " + other);
-
-				PlayerData playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+				//Add a loss to the loser's score
+				PlayerData playergame = PlayerWins.gameData.get(loser.getUniqueId());
 				if(playergame == null) {
-					Blockbattles.gameData.put(player.getUniqueId().toString(), new PlayerData(0, 0));
-					playergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+					PlayerWins.gameData.put(loser.getUniqueId(), new PlayerData(0, 0));
+					playergame = PlayerWins.gameData.get(loser.getUniqueId());
 				}
 				playergame.addLoss();
 
+				//refresh gui scoreboard
+				loser.setScoreboard(createScoreboard(loser));
 
-				player.setScoreboard(createScoreboard(player));
-				if(!player.getUniqueId().equals(other.getUniqueId())) {
-					other.teleport(old);
-					other.getInventory().setContents(DuelCommand.previousInventoryList.get(other.getUniqueId().toString()));
-					other.setHealth(DuelCommand.previousHealthList.get(other.getUniqueId().toString()));
-					other.setFoodLevel(DuelCommand.previousHungerList.get(other.getUniqueId().toString()));
-					DuelCommand.previousLocationList.remove(other.getUniqueId().toString());
-					DuelCommand.previousInventoryList.remove(other.getUniqueId().toString());
-					DuelCommand.previousHungerList.remove(other.getUniqueId().toString());
-					DuelCommand.previousHealthList.remove(other.getUniqueId().toString());
-					DuelCommand.gameIds.remove(other.getUniqueId().toString());
+				//Check if the winner and loser are the same player
+				if(!loser.getUniqueId().equals(winner.getUniqueId())) {
 
-					PlayerData othergame = Blockbattles.gameData.get(other.getUniqueId().toString());
+					//Return winner to their original position before the match and return their player data back
+					DuelManager.previousStatus.get(winner.getUniqueId()).restore(winner);
+					DuelManager.previousStatus.remove(winner.getUniqueId());
+					DuelManager.gameIds.remove(winner.getUniqueId());
+
+					//Add a win to the winner's score
+					PlayerData othergame = PlayerWins.gameData.get(winner.getUniqueId());
 					if (othergame == null) {
-						Blockbattles.gameData.put(other.getUniqueId().toString(), new PlayerData(0, 0));
-						othergame = Blockbattles.gameData.get(player.getUniqueId().toString());
+						PlayerWins.gameData.put(winner.getUniqueId(), new PlayerData(0, 0));
+						othergame = PlayerWins.gameData.get(loser.getUniqueId());
 					}
 					othergame.addWin();
 
-					other.setScoreboard(createScoreboard(other));
+					//refresh gui scoreboard
+					winner.setScoreboard(createScoreboard(winner));
 
-					ItemStack[] deck = Blockbattles.decks.get(player.getUniqueId().toString());
+					//Give the winning player the losing player's deck
+					ItemStack[] deck = DeckManager.decks.get(loser.getUniqueId());
 					if(deck != null) {
 						for (ItemStack item : deck
 						) {
 							if(item != null) {
 								ItemStack modifyItem = item.clone();
 
-								modifyItem.getItemMeta().getLore().add("Item received from besting: " + player.getName());
-								other.getInventory().addItem(item);
+								modifyItem.getItemMeta().getLore().add("Item received from besting: " + loser.getName());
+
+								winner.getInventory().addItem(modifyItem);
 							}
 						}
-						Blockbattles.decks.put(player.getUniqueId().toString(), new ItemStack[0]);
+						DeckManager.decks.put(loser.getUniqueId(), new ItemStack[0]);
 					}
 				}
-				DuelCommand.endGame(player.getUniqueId().toString());
+				//Cleanup all remaining game data
+				DuelManager.endGame(loser.getUniqueId());
 
 
-			}, 10);
+			
 
 		}
 
@@ -295,19 +302,12 @@ public class BlockListener implements Listener {
 	public void onEntitySpawn(CreatureSpawnEvent event) {
 
 		World world = event.getLocation().getWorld();
-		List<Player> players = world.getPlayers();
 
-		boolean allInGame = true;
-		for (Player player:players
-		) {
-			if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
-				allInGame = false;
-			}
-		}
-		if(allInGame && players.size() > 0) {
+		if(gameWorld(world)) {
+
 			LuaValue on_spawn = globals.get("on_spawn");
 			if (on_spawn != LuaValue.NIL) {
-				on_spawn.call(new EntitySpawnEventBuilder(event).build());
+				on_spawn.call(BBAPI.entitySpawnEvent(event));
 			}
 		}
 
@@ -320,9 +320,9 @@ public class BlockListener implements Listener {
 			if(event.getEntity() instanceof Player) {
 
 					Player attacked = (Player) event.getEntity();
-				if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) && !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
+					if((!DuelManager.isInGame(attacker.getUniqueId()) && !DuelManager.isInGame(attacked.getUniqueId()))) {
 					Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("Blockbattles"), () -> {
-						if((!DuelCommand.isInGame(attacker.getUniqueId().toString()) && !DuelCommand.isInGame(attacked.getUniqueId().toString()))) {
+						if((!DuelManager.isInGame(attacker.getUniqueId()) && !DuelManager.isInGame(attacked.getUniqueId()))) {
 							attacker.performCommand("duel " + attacked.getName());
 							attacked.performCommand("duel " + attacker.getName());
 						}
@@ -337,19 +337,10 @@ public class BlockListener implements Listener {
 	@EventHandler
 	public void onProjectile(ProjectileHitEvent event) {
 		World world = (event.getHitBlock() == null ? event.getHitEntity().getWorld():event.getHitBlock().getWorld());
-
-		List<Player> players = world.getPlayers();
-		boolean allInGame = true;
-		for (Player player:players
-		) {
-			if(!DuelCommand.isInGame(player.getUniqueId().toString())) {
-				allInGame = false;
-			}
-		}
-		if(allInGame && players.size() > 0) {
+		if(gameWorld(world)) {
 			LuaValue on_projectile = globals.get("on_projectile_hit");
 			if (on_projectile != LuaValue.NIL) {
-				on_projectile.call(new ProjectileHitEventBuilder(event).build());
+				on_projectile.call(BBAPI.projectileHitEvent(event));
 			}
 		}
 	}
